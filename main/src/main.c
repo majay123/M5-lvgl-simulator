@@ -15,46 +15,89 @@
 #define SDL_MAIN_HANDLED /*To fix SDL's "undefined reference to WinMain" issue*/
 
 #include "SDL2/SDL.h"
-#include "lvgl/lvgl.h"
-#include "examples/lv_examples.h"
 #include "demos/lv_demos.h"
+#include "examples/lv_examples.h"
 #include "lv_drivers/display/monitor.h"
-#include "lv_drivers/indev/mouse.h"
 #include "lv_drivers/indev/keyboard.h"
+#include "lv_drivers/indev/mouse.h"
 #include "lv_drivers/indev/mousewheel.h"
-#include "ui/ui.h"
+#include "lvgl/lvgl.h"
 #include "testapp/gui_guider.h"
-
+#include "ui/ui.h"
 
 static void hal_init(void);
 
 static int tick_thread(void *data);
 
-  
+static void _imgbtn1_event_cb(lv_event_t *e)
+{
+    printf("_imgbtn1_event_cb\n");
+}
 
-int main(int argc, char **argv) {
-    (void) argc; /*Unused*/
-    (void) argv; /*Unused*/
+void lv_ex_imgbtn_1(void)
+{
+    LV_IMG_DECLARE(light_on);
+    LV_IMG_DECLARE(light_off);
+
+    /*Darken the button when pressed*/
+    static lv_style_t style;
+
+    if(style.prop_cnt > 1)
+        lv_style_reset(&style);
+    else
+        lv_style_init(&style);
+    lv_style_set_img_recolor_opa(&style, LV_OPA_30);
+    lv_style_set_img_recolor(&style, lv_color_black());
+
+    /*Create an Image button*/
+    lv_obj_t *imgbtn1 = lv_imgbtn_create(lv_scr_act());
+    lv_imgbtn_set_src(imgbtn1, LV_IMGBTN_STATE_RELEASED, NULL, &light_off, NULL);
+    lv_imgbtn_set_src(imgbtn1, LV_IMGBTN_STATE_PRESSED, NULL, &light_off, NULL);
+    lv_imgbtn_set_src(imgbtn1, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &light_on, NULL);
+    lv_imgbtn_set_src(imgbtn1, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &light_on, NULL);
+    lv_obj_set_size(imgbtn1, 58, 58);
+    lv_obj_set_pos(imgbtn1, 0, 0);
+    // lv_obj_set_y(imgbtn1, 0);
+    lv_obj_set_align(imgbtn1, LV_ALIGN_CENTER);
+    // lv_imgbtn_set_checkable(imgbtn1, true);
+    lv_obj_add_style(imgbtn1, &style, LV_STATE_PRESSED);
+    // lv_obj_align(imgbtn1, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_add_flag( imgbtn1, LV_OBJ_FLAG_CHECKABLE );   /// Flags
+    lv_obj_clear_flag( imgbtn1, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
+    lv_obj_set_scrollbar_mode(imgbtn1, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_event_cb(imgbtn1, _imgbtn1_event_cb, LV_EVENT_CLICKED, imgbtn1);
+
+    /*Create a label on the Image button*/
+    // lv_obj_t * label = lv_label_create(imgbtn1);
+    // lv_label_set_text(label, "Button");
+}
+
+int main(int argc, char **argv)
+{
+    (void)argc; /*Unused*/
+    (void)argv; /*Unused*/
 
     /*Initialize LVGL*/
     lv_init();
 
     /*Initialize the HAL (display, input devices, tick) for LVGL*/
     hal_init();
-
-   //init_ui();
+    // lv_ex_imgbtn_1();
+    //init_ui();
     //lv_demo_benchmark();
     //lv_demo_keypad_encoder();
-   // lv_demo_stress();
+    // lv_demo_stress();
     // lv_demo_widgets();
-//   lv_demo_music();
- lv_ui guider_ui;
- setup_ui(&guider_ui);
-   // lv_example_slider_2();
+    //   lv_demo_music();
+     lv_ui guider_ui;
+     setup_ui(&guider_ui);
+    // lv_example_btn_1();
+    // lv_example_imgbtn_1();
+    //    lv_example_slider_3();
     // lv_example_menu_5();
-  //  lv_example_qrcode_1();
-//   lv_example_anim_2();
-// lv_example_img_3();
+    //  lv_example_qrcode_1();
+    //   lv_example_anim_2();
+    // lv_example_img_3();
 
     while (1) {
         /* Periodically call the lv_task handler.
@@ -74,7 +117,8 @@ int main(int argc, char **argv) {
  * Initialize the Hardware Abstraction Layer (HAL) for the LVGL graphics
  * library
  */
-static void hal_init(void) {
+static void hal_init(void)
+{
     /* Use the 'monitor' driver which creates window on PC's monitor to simulate a display*/
     monitor_init();
     /* Tick init.
@@ -133,10 +177,10 @@ static void hal_init(void) {
     lv_indev_set_group(enc_indev, g);
 
     /*Set a cursor for the mouse*/
-    LV_IMG_DECLARE(mouse_cursor_icon); /*Declare the image file.*/
+    LV_IMG_DECLARE(mouse_cursor_icon);                  /*Declare the image file.*/
     lv_obj_t *cursor_obj = lv_img_create(lv_scr_act()); /*Create an image object for the cursor */
-    lv_img_set_src(cursor_obj, &mouse_cursor_icon);           /*Set the image source*/
-    lv_indev_set_cursor(mouse_indev, cursor_obj);             /*Connect the image  object to the driver*/
+    lv_img_set_src(cursor_obj, &mouse_cursor_icon);     /*Set the image source*/
+    lv_indev_set_cursor(mouse_indev, cursor_obj);       /*Connect the image  object to the driver*/
 }
 
 /**
@@ -144,8 +188,9 @@ static void hal_init(void) {
  * @param data unused
  * @return never return
  */
-static int tick_thread(void *data) {
-    (void) data;
+static int tick_thread(void *data)
+{
+    (void)data;
 
     while (1) {
         SDL_Delay(5);

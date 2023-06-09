@@ -302,6 +302,33 @@ static void color_light_temp_released_event_cb(lv_event_t *e)
 	// todo 发送灯光亮度的具体参数
 }
 
+static void Color_light_click_event_cb(lv_event_t *e)
+{
+	// lv_obj_t *obj = lv_event_get_target(e);
+	// uint32_t idx = lv_obj_get_index(obj);
+	lv_obj_t *color_light = lv_event_get_user_data(e);
+	uint32_t idx = lv_obj_get_index(color_light);
+	uint32_t c_cnt = lv_obj_get_child_cnt(color_light);
+	lv_obj_t *light_icon = lv_obj_get_child(color_light, 1);
+	printf("get obj index :%d, c_cnt: %d\n", idx, c_cnt);
+	printf("stat:%d\n", lv_obj_get_state(light_icon));
+	if ((LV_STATE_FOCUSED | LV_STATE_CHECKED) == lv_obj_get_state(light_icon))
+	{
+		// 设置成按下状态
+		lv_imgbtn_set_state(light_icon, LV_IMGBTN_STATE_CHECKED_RELEASED);
+		// todo 发送开关消息
+		printf("light off\n");
+		// ui_ctrl_color_light_st(idx, false);
+	}
+	else if (LV_STATE_FOCUSED == lv_obj_get_state(light_icon))
+	{
+		lv_imgbtn_set_state(light_icon, LV_IMGBTN_STATE_RELEASED);
+		printf("light on\n");
+		// todo 发送开关消息
+		// ui_ctrl_color_light_st(idx, true);
+	}
+}
+
 /**********************************************************************
  *Functional description:调色温灯
  *Input parameter:
@@ -321,10 +348,19 @@ void Device_color_light(lv_obj_t *DeviceList, int16_t device_num)
 	lv_img_set_src(bg, &big_device_bg);
 
 	LV_IMG_DECLARE(light_on);
-	lv_obj_t *light_icon = lv_img_create(color_light);
-	lv_img_set_src(light_icon, &light_on);
-	lv_img_set_zoom(light_icon, 190);
-	lv_obj_set_pos(light_icon, 31, 68);
+	LV_IMG_DECLARE(light_off);
+
+	lv_obj_t *light_icon = lv_imgbtn_create(color_light);
+	// lv_obj_t *light_icon = lv_img_create(color_light);
+	// lv_img_set_src(light_icon, &light_on);
+	// lv_img_set_zoom(light_icon, 190);
+	// lv_obj_set_pos(light_icon, 31, 68);
+	lv_obj_set_size(light_icon, 58, 58);
+	lv_obj_set_pos(light_icon, 27, 63);
+	lv_imgbtn_set_src(light_icon, LV_IMGBTN_STATE_RELEASED, NULL, &light_on, NULL);
+	lv_imgbtn_set_src(light_icon, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &light_off, NULL);
+	lv_obj_add_flag(light_icon, LV_OBJ_FLAG_CHECKABLE);
+	lv_obj_add_event_cb(light_icon, Color_light_click_event_cb, LV_EVENT_VALUE_CHANGED, color_light);
 
 	lv_obj_t *color_light_name = lv_label_create(color_light);
 	lv_label_set_text(color_light_name, device_item[device_num].dev_name);
@@ -465,7 +501,8 @@ void Device_curtain(lv_obj_t *DeviceList, int16_t device_num)
 	lv_obj_set_style_bg_opa(curtain_slider_bg, LV_OPA_60, 0);
 
 	lv_obj_add_event_cb(curtain_slider_bg, curtain_position_change_event_cb, LV_EVENT_VALUE_CHANGED, curtain_position);
-	lv_obj_add_event_cb(curtain_slider_bg, curtain_position_released_event_cb, LV_EVENT_CLICKED, curtain);
+	lv_obj_add_event_cb(curtain_slider_bg, curtain_position_released_event_cb, LV_EVENT_VALUE_CHANGED , curtain);
+	// lv_obj_add_event_cb(curtain_slider_bg, curtain_position_released_event_cb, LV_EVENT_CLICKED, curtain);
 	// 初始值
 	lv_slider_set_value(curtain_slider_bg, 78, LV_ANIM_OFF);
 }

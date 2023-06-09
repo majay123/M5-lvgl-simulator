@@ -228,6 +228,28 @@ static void _lv_creat_set_mainpage_page(lv_ui *ui, lv_obj_t *title_section)
     lv_obj_set_style_border_width(qr, 5, 0);
 }
 
+static void _lv_wifi_click_event_cb(lv_event_t * e)
+{
+    // st_wifi *item_wifi = (st_wifi *)lv_event_get_user_data(e);
+    // printf("wifi_name: %s\n", item_wifi->wifi_name);
+    // printf("connect_st: %s\n", item_wifi->connect_st);
+    // printf("wifi_dbm: %d\n", item_wifi->wifi_dbm);
+    // printf("lock_st: %d\n", item_wifi->lock_st);
+    printf("goto wifi setting\n");
+	lv_ui *ui = lv_event_get_user_data(e);
+
+	lv_obj_t *act_scr = lv_scr_act();
+	lv_disp_t *d = lv_obj_get_disp(act_scr);
+	if (d->prev_scr == NULL && (d->scr_to_load == NULL || d->scr_to_load == act_scr))
+	{
+		lv_obj_clean(act_scr);
+		if (ui->Wifi_Set_del == true)
+			ui_wifi_set(ui);
+		lv_scr_load_anim(ui->Wifi_Set, LV_SCR_LOAD_ANIM_NONE, 0, 0, true);
+		ui->Setting_del = true;
+	}
+}
+
 /**********************************************************************
  *Functional description:创建wifi界面
  *Input parameter:
@@ -283,9 +305,12 @@ static void _lv_creat_wifi_page(lv_ui *ui, lv_obj_t *title_section)
         lv_obj_set_pos(wifi_item, 0, 0);
         lv_obj_set_style_pad_all(wifi_item, 0, 0);
         lv_obj_set_style_border_width(wifi_item, 0, 0);
-        // lv_obj_set_style_bg_color(wifi_item, lv_color_hex(0x87878b), 0);
+        // LV_STATE_CHECKED
+        lv_obj_add_flag(wifi_item, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_style_bg_color(wifi_item, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_color(wifi_item, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_FOCUSED);
         lv_obj_set_size(wifi_item, 300, 40);
-        lv_obj_set_style_bg_opa(wifi_item, 0, 0);
+        lv_obj_set_style_bg_opa(wifi_item, LV_OPA_COVER, 0);
 
         // wifi name
         lv_obj_t *wifi_name = lv_label_create(wifi_item);
@@ -330,6 +355,7 @@ static void _lv_creat_wifi_page(lv_ui *ui, lv_obj_t *title_section)
             lv_img_set_src(wifi_lock, &ic_lock);
             lv_obj_set_pos(wifi_lock, 275, 9);
         }
+        lv_obj_add_event_cb(wifi_item, _lv_wifi_click_event_cb, LV_EVENT_CLICKED, ui);
     }
 }
 
