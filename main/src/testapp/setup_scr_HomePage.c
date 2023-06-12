@@ -28,7 +28,7 @@ typedef struct
 
 st_device device_item[] = {
 	{.dev_st = true, .dev_online = true, .dev_type = 1, .dev_name = "bt1", .dev_id = 15},
-	{.dev_st = true, .dev_online = true, .dev_type = 1, .dev_name = "bt2", .dev_id = 16},
+	{.dev_st = true, .dev_online = true, .dev_type = 1, .dev_name = "bt21", .dev_id = 16},
 	{.dev_st = true, .dev_online = true, .dev_type = 2, .dev_name = "curtain1", .dev_id = 17},
 	{.dev_st = true, .dev_online = true, .dev_type = 1, .dev_name = "bt3", .dev_id = 18},
 	{.dev_st = true, .dev_online = true, .dev_type = 2, .dev_name = "curtain2", .dev_id = 19},
@@ -42,6 +42,26 @@ st_device device_item[] = {
 	{.dev_st = true, .dev_online = true, .dev_type = 3, .dev_name = "scene2", .dev_id = 27},
 
 };
+
+
+static void set_main_page_device_card_style(lv_obj_t *device, int w, int h)
+{
+	if(device == NULL) {
+		printf("obj device is null!\r\n");
+		return;
+	}
+	
+	lv_obj_set_size(device, w, h);
+    // lv_obj_add_flag(switch_btn, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
+    // lv_obj_clear_flag(switch_btn, LV_OBJ_FLAG_SCROLLABLE);     /// Flags
+	lv_obj_set_style_radius(device, 15, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(device, lv_color_hex(0xAFAFAF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(device, 60, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_color(device, lv_color_hex(0xB5AFAF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(device, 80, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_width(device, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_pad(device, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+}
 
 /**********************************************************************
  *Functional description:开关 设备点击事件
@@ -96,11 +116,15 @@ void Device_switch(lv_obj_t *DeviceList, int16_t device_num)
 	lv_obj_t *switch_btn = lv_obj_create(DeviceList);
 	ui_init_device(switch_btn);
 
+#if HOPEPAGE_USE_PIC
 	lv_obj_t *bg = lv_img_create(switch_btn);
 	LV_IMG_DECLARE(device_bg);
 	lv_img_set_src(bg, &device_bg);
+#else
+    set_main_page_device_card_style(switch_btn, 215, 140);
+#endif
 
-	// 开关是switch 的状态，有打开和关闭
+    // 开关是switch 的状态，有打开和关闭
 	LV_IMG_DECLARE(light_on);
 	LV_IMG_DECLARE(light_off);
 	lv_obj_t *light_icon = lv_imgbtn_create(switch_btn);
@@ -210,9 +234,10 @@ void Device_dimming_light(lv_obj_t *DeviceList, int16_t device_num)
 	lv_obj_t *dimming_light = lv_obj_create(DeviceList);
 	ui_init_device(dimming_light);
 
-	LV_IMG_DECLARE(big_device_bg);
-	lv_obj_t *bg = lv_img_create(dimming_light);
-	lv_img_set_src(bg, &big_device_bg);
+	// LV_IMG_DECLARE(big_device_bg);
+	// lv_obj_t *bg = lv_img_create(dimming_light);
+	// lv_img_set_src(bg, &big_device_bg);
+	set_main_page_device_card_style(dimming_light, 440, 140);
 
 	LV_IMG_DECLARE(light_off);
 	lv_obj_t *light_icon = lv_img_create(dimming_light);
@@ -391,7 +416,7 @@ void Device_color_light(lv_obj_t *DeviceList, int16_t device_num)
 	lv_obj_set_style_bg_grad_color(color_light_color_slider, lv_color_hex(0xfffcfa), LV_PART_INDICATOR);
 	lv_obj_set_style_bg_grad_dir(color_light_color_slider, LV_GRAD_DIR_HOR, LV_PART_INDICATOR);
 	// todo LV_PART_KNOB 待设置图片
-	LV_IMG_DECLARE(light_knob);
+	// LV_IMG_DECLARE(light_knob);
 	lv_obj_set_style_bg_img_src(color_light_color_slider, &light_knob, LV_PART_KNOB);
 	lv_obj_set_style_bg_opa(color_light_color_slider, LV_OPA_0, LV_PART_KNOB);
 	lv_obj_set_style_bg_color(color_light_color_slider, lv_color_hex(0xfdeddd), LV_PART_KNOB);
@@ -486,8 +511,8 @@ void Device_curtain(lv_obj_t *DeviceList, int16_t device_num)
 	lv_obj_set_size(curtain_position, 100, 25);
 	lv_obj_set_style_text_color(curtain_position, lv_color_hex(0xffffff), 0);
 
-	LV_IMG_DECLARE(curtain_knob);
-	LV_IMG_DECLARE(curtain_slider);
+	// LV_IMG_DECLARE(curtain_knob);
+	// LV_IMG_DECLARE(curtain_slider);
 	lv_obj_t *curtain_slider_bg = lv_slider_create(curtain);
 	// todo 设置背景 滑动条背景
 	lv_obj_set_style_bg_img_src(curtain_slider_bg, &curtain_knob, LV_PART_KNOB);
@@ -553,7 +578,7 @@ static void _lv_show_weather(lv_ui *ui)
 	ui_init_cont(weather_cont, LV_OPA_TRANSP);
 
 	// todo 天气图片在确定天气后再加载图片
-	LV_IMG_DECLARE(w_sunny);
+	// LV_IMG_DECLARE(w_sunny);
 	lv_obj_t *icon_sunny = lv_img_create(weather_cont);
 	lv_img_set_src(icon_sunny, &w_sunny);
 	lv_obj_set_pos(icon_sunny, 20, 0);

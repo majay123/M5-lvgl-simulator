@@ -325,11 +325,22 @@ void lv_keyboard_def_event_cb(lv_event_t * e)
     if(keyboard->ta == NULL) return;
 
     if(strcmp(txt, "Enter") == 0 || strcmp(txt, LV_SYMBOL_NEW_LINE) == 0) {
+        #if 0
         lv_textarea_add_char(keyboard->ta, '\n');
         if(lv_textarea_get_one_line(keyboard->ta)) {
             lv_res_t res = lv_event_send(keyboard->ta, LV_EVENT_READY, NULL);
             if(res != LV_RES_OK) return;
         }
+        #else
+        lv_res_t res = lv_event_send(obj, LV_EVENT_READY, NULL);
+        if(res != LV_RES_OK) return;
+
+        if(keyboard->ta) {
+            res = lv_event_send(keyboard->ta, LV_EVENT_READY, NULL);
+            if(res != LV_RES_OK) return;
+        }
+        return;
+        #endif
     }
     else if(strcmp(txt, LV_SYMBOL_LEFT) == 0) {
         lv_textarea_cursor_left(keyboard->ta);

@@ -1,4 +1,44 @@
 /*
+ * 
+ * 　　┏┓　　　┏┓+ +
+ * 　┏┛┻━━━┛┻┓ + +
+ * 　┃　　　　　　　┃ 　
+ * 　┃　　　━　　　┃ ++ + + +
+ *  ████━████ ┃+
+ * 　┃　　　　　　　┃ +
+ * 　┃　　　┻　　　┃
+ * 　┃　　　　　　　┃ + +
+ * 　┗━┓　　　┏━┛
+ * 　　　┃　　　┃　　　　　　　　　　　
+ * 　　　┃　　　┃ + + + +
+ * 　　　┃　　　┃
+ * 　　　┃　　　┃ +  神兽保佑
+ * 　　　┃　　　┃    代码无bug　　
+ * 　　　┃　　　┃　　+　　　　　　　　　
+ * 　　　┃　 　　┗━━━┓ + +
+ * 　　　┃ 　　　　　　　┣┓
+ * 　　　┃ 　　　　　　　┏┛
+ * 　　　┗┓┓┏━┳┓┏┛ + + + +
+ * 　　　　┃┫┫　┃┫┫
+ * 　　　　┗┻┛　┗┻┛+ + + +
+ * 
+ * 
+ * 
+ * ************Copyright 2023 MCD************
+ * 
+ * @version      : 
+ * @Company      : HOPE
+ * @Author       : MCD
+ * @Date         : 2023-05-26 14:05:40
+ * @LastEditors  : MCD
+ * @LastEditTime : 2023-06-10 15:29:19
+ * @FilePath     : /M5-lvgl-simulator/main/src/testapp/gui_guider.h
+ * @Description  : 
+ * 
+ * ******************************************
+ */
+
+/*
  * @Company: Hope
  * @Author: RunningCode
  * @Date: 2023-04-20 10:59:27
@@ -25,6 +65,23 @@ extern "C" {
 #define LCD_WIDTH  480
 #define LCD_HEIGHT 480
 
+#define HOPEPAGE_USE_PIC	(0)
+
+typedef struct _sta_scan_res
+{
+	uint8_t bssid[6];    /**< The BSSID of AP */
+	char ssid[32];     /**< The SSID of AP */
+	char on_channel;   /**< Indicate whether the channel in DS IE is valid 2.4G channel */
+	char channel;      /**< The channel of AP */
+	uint16_t beacon_int; /**< Beacon interval of AP */
+	uint16_t caps;       /**< Capability IE of AP */
+	int level;         /**< RSSI of the received frame */
+	int security;      /**< Encryption algorithm of AP */
+	uint8_t tsf[8];      /**< TSF value in beacon or probe response */
+	uint32_t ie_len;     /**< IE length of beacon or probe response */
+	/* Followed by ie_len of IE data */
+}sta_scan_res_t;
+
 typedef struct
 {
     lv_obj_t *HomePage;    //主界面和列表界面
@@ -45,9 +102,9 @@ typedef struct
     lv_obj_t *failed_cont;
     bool AddDevice_del;
 
-	lv_obj_t *Wifi_Set;
+    lv_obj_t *Wifi_Set;
     bool Wifi_Set_del;
-
+    sta_scan_res_t wifi_select;
 } lv_ui;
 
 void init_scr_del_flag(lv_ui *ui);
@@ -59,6 +116,11 @@ void setup_scr_AddDevice(lv_ui *ui);
 void ui_wifi_set(lv_ui *ui);
 LV_IMG_DECLARE(bg);
 LV_FONT_DECLARE(HanSansCN_20);
+LV_IMG_DECLARE(light_knob);
+LV_IMG_DECLARE(curtain_knob);
+LV_IMG_DECLARE(curtain_slider);
+LV_IMG_DECLARE(w_sunny);
+
 
 #ifdef __cplusplus
 }

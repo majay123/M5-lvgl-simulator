@@ -236,7 +236,12 @@ static void _lv_wifi_click_event_cb(lv_event_t * e)
     // printf("wifi_dbm: %d\n", item_wifi->wifi_dbm);
     // printf("lock_st: %d\n", item_wifi->lock_st);
     printf("goto wifi setting\n");
+    lv_obj_t *wifi_tag = lv_event_get_target(e);
 	lv_ui *ui = lv_event_get_user_data(e);
+    uint32_t index = lv_obj_get_index(wifi_tag);
+    // ui->wifi_selected = index;
+
+    printf("wifi_tag: %d\n", index);
 
 	lv_obj_t *act_scr = lv_scr_act();
 	lv_disp_t *d = lv_obj_get_disp(act_scr);
