@@ -31,7 +31,7 @@
  * @Author       : MCD
  * @Date         : 2023-05-26 14:05:40
  * @LastEditors  : MCD
- * @LastEditTime : 2023-06-10 15:29:19
+ * @LastEditTime : 2023-06-19 17:46:33
  * @FilePath     : /M5-lvgl-simulator/main/src/testapp/gui_guider.h
  * @Description  : 
  * 
@@ -66,6 +66,8 @@ extern "C" {
 #define LCD_HEIGHT 480
 
 #define HOPEPAGE_USE_PIC	(0)
+#define COUNTDOWN_CNT_60S (60)    // s
+#define WIFI_PASSWORD_MIN_LEN (8)    // s
 
 typedef struct _sta_scan_res
 {
@@ -80,6 +82,7 @@ typedef struct _sta_scan_res
 	uint8_t tsf[8];      /**< TSF value in beacon or probe response */
 	uint32_t ie_len;     /**< IE length of beacon or probe response */
 	/* Followed by ie_len of IE data */
+    uint8_t remember;
 }sta_scan_res_t;
 
 typedef struct
@@ -97,12 +100,17 @@ typedef struct
     lv_obj_t *menu;
 
     lv_obj_t *AddDevice;
+    lv_obj_t *Countdown_lable;
+    lv_obj_t *succeed_lable;
     lv_obj_t *add_cont;
     lv_obj_t *successed_cont;
     lv_obj_t *failed_cont;
     bool AddDevice_del;
 
     lv_obj_t *Wifi_Set;
+    lv_obj_t *wifi_c_btn;
+    lv_obj_t *wifi_ok_btn;
+    lv_obj_t *wifi_keyboard;
     bool Wifi_Set_del;
     sta_scan_res_t wifi_select;
 } lv_ui;

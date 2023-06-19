@@ -215,7 +215,7 @@ static void dimming_light_released_event_cb(lv_event_t *e)
 	lv_obj_t *dimming_light = lv_event_get_target(e);
 	lv_obj_t *obj = lv_event_get_user_data(e);
 	uint32_t idx = lv_obj_get_index(obj);
-	printf("dimming:%d", lv_slider_get_value(dimming_light));
+	printf("dimming:%d; ", lv_slider_get_value(dimming_light));
 	printf("idx:%d; dev_id:%d ; name:%s\n", idx, device_item[idx].dev_id, device_item[idx].dev_name);
 	// todo 发送灯光亮度的具体参数
 }
@@ -722,6 +722,8 @@ static void _lv_creat_device_page(lv_ui *ui)
 	lv_obj_set_pos(ui->DeviceList, 0, 20);
 	lv_obj_set_size(ui->DeviceList, LCD_WIDTH, 460);
 	lv_obj_set_flex_flow(ui->DeviceList, LV_FLEX_FLOW_ROW_WRAP);
+	// lv_obj_set_flex_flow(ui->DeviceList ,  LV_FLEX_FLOW_COLUMN_WRAP_REVERSE);
+    // lv_obj_set_scroll_snap_x(ui->DeviceList , LV_SCROLL_SNAP_CENTER);
 	lv_obj_set_layout(ui->DeviceList, LV_LAYOUT_FLEX);
 	lv_obj_set_style_bg_opa(ui->DeviceList, LV_OPA_TRANSP, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_scrollbar_mode(ui->DeviceList, LV_SCROLLBAR_MODE_OFF);
@@ -750,6 +752,7 @@ static void _lv_create_HomePage_tabview(lv_ui *ui)
 	lv_obj_set_size(ui->tabview, LCD_WIDTH, LCD_HEIGHT); // 宏定义屏幕宽度，高度
 	lv_obj_set_scrollbar_mode(ui->tabview, LV_SCROLLBAR_MODE_OFF);
 	lv_obj_set_style_pad_all(ui->tabview, 0, 0);
+
 	// 创建主页
 	_lv_creat_main_page(ui);
 	// 创建设备页面
@@ -898,14 +901,16 @@ static void _lv_create_Apps_entry(lv_ui *ui)
 	lv_obj_add_event_cb(set_icon, set_icon_event_handler, LV_EVENT_CLICKED, ui);
 
 	lv_obj_t *add_lable = lv_label_create(cont);
-	lv_label_set_text(add_lable, "Add Device");
-	lv_obj_set_pos(add_lable, 100, 104);
+	lv_obj_set_style_text_font(add_lable, &HanSansCN_20, 0);
+	lv_label_set_text(add_lable, "添加");
+	lv_obj_set_pos(add_lable, 120, 104);
 	lv_obj_set_size(add_lable, 100, 25);
 	lv_obj_set_style_text_color(add_lable, lv_color_hex(0xffffff), 0);
 
 	lv_obj_t *set_lable = lv_label_create(cont);
-	lv_label_set_text(set_lable, "Setting");
-	lv_obj_set_pos(set_lable, 330, 104);
+	lv_obj_set_style_text_font(set_lable, &HanSansCN_20, 0);
+	lv_label_set_text(set_lable, "设置");
+	lv_obj_set_pos(set_lable, 320, 104);
 	lv_obj_set_size(set_lable, 100, 25);
 	lv_obj_set_style_text_color(set_lable, lv_color_hex(0xffffff), 0);
 }

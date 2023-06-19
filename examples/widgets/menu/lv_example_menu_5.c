@@ -1,4 +1,7 @@
 #include "../../lv_examples.h"
+
+#include <string.h>
+#include <stdio.h>
 #if LV_USE_MENU && LV_USE_MSGBOX && LV_BUILD_EXAMPLES
 
 enum {
@@ -9,6 +12,7 @@ typedef uint8_t lv_menu_builder_variant_t;
 
 static void back_event_handler(lv_event_t * e);
 static void switch_handler(lv_event_t * e);
+static void root_page_handler(lv_event_t *e);
 lv_obj_t * root_page;
 static lv_obj_t * create_text(lv_obj_t * parent, const char * icon, const char * txt,
                               lv_menu_builder_variant_t builder_variant);
@@ -93,10 +97,13 @@ void lv_example_menu_5(void)
     section = lv_menu_section_create(root_page);
     cont = create_text(section, LV_SYMBOL_SETTINGS, "Mechanics", LV_MENU_ITEM_BUILDER_VARIANT_1);
     lv_menu_set_load_page_event(menu, cont, sub_mechanics_page);
+    lv_obj_add_event_cb(cont, root_page_handler, LV_EVENT_CLICKED, cont);
     cont = create_text(section, LV_SYMBOL_AUDIO, "Sound", LV_MENU_ITEM_BUILDER_VARIANT_1);
     lv_menu_set_load_page_event(menu, cont, sub_sound_page);
+    lv_obj_add_event_cb(cont, root_page_handler, LV_EVENT_CLICKED, cont);
     cont = create_text(section, LV_SYMBOL_SETTINGS, "Display", LV_MENU_ITEM_BUILDER_VARIANT_1);
     lv_menu_set_load_page_event(menu, cont, sub_display_page);
+    lv_obj_add_event_cb(cont, root_page_handler, LV_EVENT_CLICKED, cont);
 
     create_text(root_page, NULL, "Others", LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(root_page);
@@ -106,8 +113,20 @@ void lv_example_menu_5(void)
     lv_menu_set_load_page_event(menu, cont, sub_menu_mode_page);
 
     lv_menu_set_sidebar_page(menu, root_page);
+    // lv_obj_add_event_cb(menu, root_page_handler, LV_EVENT_VALUE_CHANGED, root_page);
 
     lv_event_send(lv_obj_get_child(lv_obj_get_child(lv_menu_get_cur_sidebar_page(menu), 0), 0), LV_EVENT_CLICKED, NULL);
+
+}
+
+static void root_page_handler(lv_event_t *e)
+{
+    // lv_obj_t * obj = lv_event_get_target(e);
+    lv_obj_t * root_page = lv_event_get_user_data(e);
+
+    uint32_t index = lv_obj_get_index(root_page);
+
+    printf("Root page click. index = %d\n", index);
 }
 
 static void back_event_handler(lv_event_t * e)

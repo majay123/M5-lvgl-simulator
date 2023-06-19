@@ -6,6 +6,7 @@ static void ta_event_cb(lv_event_t * e)
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t * ta = lv_event_get_target(e);
     lv_obj_t * kb = lv_event_get_user_data(e);
+    LV_LOG_USER("code = %d\n", code);
     if(code == LV_EVENT_FOCUSED) {
         lv_keyboard_set_textarea(kb, ta);
         lv_obj_clear_flag(kb, LV_OBJ_FLAG_HIDDEN);

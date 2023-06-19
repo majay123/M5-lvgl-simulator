@@ -45,6 +45,27 @@ st_wifi st_wifi_item[] = {
     {.lock_st = true, .wifi_name = "huonfgdnfg", .connect_st = "connecting", .wifi_dbm = 1},
 };
 
+st_wifi st_wifi_item1[] = {
+    {.lock_st = true, .wifi_name = "vsdfgvdfg", .connect_st = "connect", .wifi_dbm = 1},
+    {.lock_st = true, .wifi_name = "tesdfgdfgst2", .connect_st = "error", .wifi_dbm = 2},
+    {.lock_st = false, .wifi_name = "rqwerweq", .connect_st = "error", .wifi_dbm = 3},
+    {.lock_st = true, .wifi_name = "tesfsdft4", .connect_st = "error", .wifi_dbm = 3},
+    {.lock_st = false, .wifi_name = "dasdasdas", .connect_st = "error", .wifi_dbm = 2},
+    {.lock_st = true, .wifi_name = "dasdasdas", .connect_st = "error", .wifi_dbm = 2},
+    {.lock_st = true, .wifi_name = "wifiname", .connect_st = "error", .wifi_dbm = 1},
+    {.lock_st = true, .wifi_name = "gsdfgsfd", .connect_st = "error", .wifi_dbm = 1},
+    {.lock_st = false, .wifi_name = "fsdggssrf", .connect_st = "error", .wifi_dbm = 1},
+    {.lock_st = true, .wifi_name = "huonfgdnfg", .connect_st = "error", .wifi_dbm = 1},
+    {.lock_st = true, .wifi_name = "rqwerweq", .connect_st = "error", .wifi_dbm = 1},
+    {.lock_st = false, .wifi_name = "tesfsdft4", .connect_st = "error", .wifi_dbm = 1},
+    {.lock_st = true, .wifi_name = "dasdasdas", .connect_st = "error", .wifi_dbm = 1},
+    {.lock_st = false, .wifi_name = "dasdasdas", .connect_st = "error", .wifi_dbm = 1},
+    {.lock_st = false, .wifi_name = "wifiname", .connect_st = "error", .wifi_dbm = 1},
+    {.lock_st = false, .wifi_name = "gsdfgsfd", .connect_st = "error", .wifi_dbm = 1},
+    {.lock_st = true, .wifi_name = "fsdggssrf", .connect_st = "error", .wifi_dbm = 1},
+    {.lock_st = true, .wifi_name = "huonfgdnfg", .connect_st = "connecting", .wifi_dbm = 1},
+};
+
 lv_obj_t *root_page1;
 
 static void back_event_handler(lv_event_t *e)
@@ -188,6 +209,10 @@ static void _lv_creat_delete_dev_page(lv_ui *ui, lv_obj_t *title_section)
     // 二键开关，三键开关，四按键开关
 }
 
+static void _setting_mainpage_clicked_event_cb(lv_event_t * e)
+{
+    printf("wifi clicked\n");
+}
 /**********************************************************************
  *Functional description:主页设置
  *Input parameter:
@@ -208,6 +233,7 @@ static void _lv_creat_set_mainpage_page(lv_ui *ui, lv_obj_t *title_section)
 
     lv_menu_separator_create(set_mainpage_page);                   // ui->menu separator
     lv_obj_t *section = lv_menu_section_create(set_mainpage_page); // Create a ui->menu section object
+    lv_obj_add_event_cb(cont, _setting_mainpage_clicked_event_cb, LV_EVENT_CLICKED, ui);
 
     lv_obj_t *mainpage_cont = lv_obj_create(section);
     ui_init_menu_cont(mainpage_cont, LV_OPA_COVER, 0, 60);
@@ -255,6 +281,11 @@ static void _lv_wifi_click_event_cb(lv_event_t * e)
 	}
 }
 
+static void _setting_wifi_clicked_event_cb(lv_event_t * e)
+{
+    printf("wifi clicked\n");
+}
+
 /**********************************************************************
  *Functional description:创建wifi界面
  *Input parameter:
@@ -271,6 +302,7 @@ static void _lv_creat_wifi_page(lv_ui *ui, lv_obj_t *title_section)
     // 标题
     lv_obj_t *cont = create_text(title_section, "WIFI设置"); // 创建Mechanics菜单子项
     lv_menu_set_load_page_event(ui->menu, cont, wifi_page);                                    // 加载cont到menu,设置跳转界面wifi_page
+    // lv_obj_add_event_cb(cont, _setting_wifi_clicked_event_cb, LV_EVENT_CLICKED, ui);
 
     lv_menu_separator_create(wifi_page);                   // ui->menu separator
     lv_obj_t *section = lv_menu_section_create(wifi_page); // Create a ui->menu section object
@@ -380,8 +412,10 @@ static void _lv_create_setting_menu(lv_ui *ui)
     lv_menu_set_mode_root_back_btn(ui->menu, LV_MENU_ROOT_BACK_BTN_ENABLED); // 使能根菜单返回键
     lv_obj_set_size(ui->menu, 480, 480);                                     // 设置大小
     lv_obj_center(ui->menu);                                                 // 居中显示
+    // lv_obj_set_style_text_font(ui->menu, &HanSansCN_20, 0);
 
-    lv_obj_t *root_page = lv_menu_page_create(ui->menu, "Settings");
+    lv_obj_t *root_page = lv_menu_page_create(ui->menu, "设置");
+    lv_obj_set_style_text_font(root_page, &HanSansCN_20, 0);
     lv_obj_set_style_pad_hor(root_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(ui->menu), 0), 0); // 设置水平PAD间距
     lv_obj_t *title_section = lv_menu_item_create(root_page);                                                // 创建标题
     lv_menu_set_sidebar_page(ui->menu, root_page);                                                           // 设置菜单sidebar风格显示

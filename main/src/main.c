@@ -82,6 +82,8 @@ int main(int argc, char **argv)
 
     /*Initialize the HAL (display, input devices, tick) for LVGL*/
     hal_init();
+     lv_ui guider_ui;
+     setup_ui(&guider_ui);
     // lv_ex_imgbtn_1();
     //init_ui();
     //lv_demo_benchmark();
@@ -89,8 +91,6 @@ int main(int argc, char **argv)
     // lv_demo_stress();
     // lv_demo_widgets();
     //   lv_demo_music();
-     lv_ui guider_ui;
-     setup_ui(&guider_ui);
     // lv_example_btn_1();
     // lv_example_imgbtn_1();
     //    lv_example_slider_3();
@@ -98,6 +98,7 @@ int main(int argc, char **argv)
     //  lv_example_qrcode_1();
     //   lv_example_anim_2();
     // lv_example_img_3();
+    // lv_example_keyboard_1();
 
     while (1) {
         /* Periodically call the lv_task handler.
