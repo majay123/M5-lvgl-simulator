@@ -31,7 +31,7 @@
  * @Author       : MCD
  * @Date         : 2023-05-26 14:05:40
  * @LastEditors  : MCD
- * @LastEditTime : 2023-06-19 17:46:33
+ * @LastEditTime : 2023-06-20 14:51:05
  * @FilePath     : /M5-lvgl-simulator/main/src/testapp/gui_guider.h
  * @Description  : 
  * 
@@ -96,8 +96,11 @@ typedef struct
     lv_obj_t *Apps_entry;  //APP入口
 
     lv_obj_t *Setting;
-    bool Setting_del;
+    lv_obj_t *wifi_list;
+    lv_obj_t *devices_list;
+    lv_obj_t *qr;
     lv_obj_t *menu;
+    bool Setting_del;
 
     lv_obj_t *AddDevice;
     lv_obj_t *Countdown_lable;

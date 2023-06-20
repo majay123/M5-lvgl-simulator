@@ -99,6 +99,7 @@ int main(int argc, char **argv)
     //   lv_example_anim_2();
     // lv_example_img_3();
     // lv_example_keyboard_1();
+    // lv_example_checkbox_1();
 
     while (1) {
         /* Periodically call the lv_task handler.
