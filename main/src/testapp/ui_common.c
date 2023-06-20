@@ -39,6 +39,31 @@ void ui_init_menu_cont(lv_obj_t *cont,lv_opa_t value, lv_coord_t x, lv_coord_t y
     lv_obj_set_style_bg_color(cont, lv_color_hex(0x000000), 0);
 }
 
+/**
+ * @brief Set the common obj style object, 方块按钮形状
+ * 
+ * @param btn 
+ * @param w 
+ * @param h 
+ */
+void set_common_btn_style(lv_obj_t *btn, int w, int h)
+{
+	if(btn == NULL) {
+		printf("obj device is null!\r\n");
+		return;
+	}
+	
+	lv_obj_set_size(btn, w, h);
+	lv_obj_set_style_radius(btn, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(btn, lv_color_hex(0xAFAFAF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(btn, 60, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_color(btn, lv_color_hex(0xB5AFAF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(btn, 80, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_width(btn, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_pad(btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_color(btn, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_shadow_opa(btn, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+}
 
 
 

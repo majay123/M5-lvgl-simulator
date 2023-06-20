@@ -214,6 +214,11 @@ static void _lv_qr_click_event_cb(lv_event_t * e)
     lv_qrcode_update(ui->qr, buf, strlen(buf));
 }
 
+static void _delete_devices_event_cb(lv_event_t * e)
+{
+    printf("delete devices event: %d\n", lv_event_get_code(e));
+}
+
 static void _device_item_event_cb(lv_event_t * e)
 {
     // printf("this device is checked\n");
@@ -282,7 +287,7 @@ static void _lv_creat_delete_dev_page(lv_ui *ui, lv_obj_t *title_section)
 
     ui->devices_list = lv_obj_create(delete_cont);
     lv_obj_set_pos(ui->devices_list, 0, 50);
-    lv_obj_set_size(ui->devices_list, 300, 430);
+    lv_obj_set_size(ui->devices_list, 300, 350);
     lv_obj_set_flex_flow(ui->devices_list, LV_FLEX_FLOW_ROW_WRAP);
     lv_obj_set_layout(ui->devices_list, LV_LAYOUT_FLEX);
     lv_obj_set_style_bg_opa(ui->devices_list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -291,6 +296,18 @@ static void _lv_creat_delete_dev_page(lv_ui *ui, lv_obj_t *title_section)
     lv_obj_set_style_radius(ui->devices_list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_all(ui->devices_list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui->devices_list, lv_color_hex(0x000000), 0);
+
+    lv_obj_t *delete_btn = lv_btn_create(delete_cont);
+    // // lv_obj_add_event_cb(delete_btn, _connect_btn_event_cb, LV_EVENT_CLICKED, ui);
+    lv_obj_set_pos(delete_btn, 85, 413);
+    lv_obj_add_flag(delete_btn, LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_clear_flag(delete_btn, LV_OBJ_FLAG_SCROLLABLE);  /// Flags
+    set_common_btn_style(delete_btn, 135, 40);
+    lv_obj_t *label = lv_label_create(delete_btn);
+    lv_obj_set_style_text_font(label, &HanSansCN_20, 0);
+    lv_label_set_text(label, "删除设备");
+    lv_obj_center(label);
+    lv_obj_add_event_cb(delete_btn, _delete_devices_event_cb, LV_EVENT_CLICKED, ui);
 
     // todo 获取设备列表
     // 一键开关，窗帘，调光灯，调色温灯为一个类型
