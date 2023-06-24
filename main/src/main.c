@@ -25,6 +25,8 @@
 #include "testapp/gui_guider.h"
 #include "ui/ui.h"
 
+lv_ui guider_ui;
+
 static void hal_init(void);
 
 static int tick_thread(void *data);
@@ -82,8 +84,8 @@ int main(int argc, char **argv)
 
     /*Initialize the HAL (display, input devices, tick) for LVGL*/
     hal_init();
-     lv_ui guider_ui;
-     setup_ui(&guider_ui);
+    memset(&guider_ui, 0, sizeof(guider_ui));
+    setup_ui(&guider_ui);
     // lv_ex_imgbtn_1();
     //init_ui();
     //lv_demo_benchmark();
@@ -100,6 +102,7 @@ int main(int argc, char **argv)
     // lv_example_img_3();
     // lv_example_keyboard_1();
     // lv_example_checkbox_1();
+    // lv_example_msgbox_1();
 
     while (1) {
         /* Periodically call the lv_task handler.

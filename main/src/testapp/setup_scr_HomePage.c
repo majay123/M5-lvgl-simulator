@@ -75,6 +75,7 @@ static void set_main_page_device_card_style(lv_obj_t *device, int w, int h)
 static void Device_switch_click_event_cb(lv_event_t *e)
 {
 	lv_obj_t *obj = lv_event_get_target(e);
+
 	uint32_t idx = lv_obj_get_index(obj);
 	lv_obj_t *light_icon = lv_event_get_user_data(e);
 	printf("stat:%d\n", lv_obj_get_state(light_icon));
@@ -88,8 +89,10 @@ static void Device_switch_click_event_cb(lv_event_t *e)
 		lv_imgbtn_set_state(light_icon, LV_IMGBTN_STATE_RELEASED);
 		// todo 发送开关消息
 	}
-
+	// guider_ui.MainPage
+	uint16_t page_index = lv_tabview_get_tab_act(guider_ui.tabview);
 	printf("idx:%d; dev_id:%d ; name:%s\n", idx, device_item[idx].dev_id, device_item[idx].dev_name);
+	printf("page index = %d\n", page_index);
 }
 
 static void Device_switch_value_event_cb(lv_event_t *e)
@@ -99,6 +102,7 @@ static void Device_switch_value_event_cb(lv_event_t *e)
 	uint32_t idx = lv_obj_get_index(light_icon);
 	printf("idx:%d; dev_id:%d ; name:%s\n", idx, device_item[idx].dev_id, device_item[idx].dev_name);
 	// todo 发送开关消息
+
 }
 
 /**********************************************************************

@@ -46,12 +46,16 @@
 #define LV_KEYBOARD_ENTER (22)
 #define LV_KEYBOARD_OK    (39)
 
+static void back_SettingPage(lv_ui *ui);
+
 static void _cancel_btn_event_cb(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
 
     if (code == LV_EVENT_CLICKED) {
         LV_LOG_USER("Button1");
+        lv_ui *ui = lv_event_get_user_data(e);
+        back_SettingPage(ui);
     }
 }
 

@@ -354,7 +354,11 @@ void lv_menu_set_sidebar_page(lv_obj_t * obj, lv_obj_t * page)
             menu->sidebar_header_back_btn = sidebar_header_back_btn;
 
             lv_obj_t * sidebar_header_back_icon = lv_img_create(menu->sidebar_header_back_btn);
-            lv_img_set_src(sidebar_header_back_icon, LV_SYMBOL_LEFT);
+            // lv_img_set_src(sidebar_header_back_icon, LV_SYMBOL_LEFT);
+            /* add by MCD 2023-06-21-14:24 */
+            LV_IMG_DECLARE(ic_back);
+            lv_img_set_src(sidebar_header_back_icon, &ic_back);
+            /* end add */
 
             lv_obj_t * sidebar_header_title = lv_label_create(menu->sidebar_header);
             lv_obj_add_flag(sidebar_header_title, LV_OBJ_FLAG_HIDDEN);

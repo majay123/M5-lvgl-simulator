@@ -31,7 +31,7 @@
  * @Author       : MCD
  * @Date         : 2023-05-26 14:05:40
  * @LastEditors  : MCD
- * @LastEditTime : 2023-06-20 14:51:05
+ * @LastEditTime : 2023-06-24 14:37:46
  * @FilePath     : /M5-lvgl-simulator/main/src/testapp/gui_guider.h
  * @Description  : 
  * 
@@ -68,6 +68,15 @@ extern "C" {
 #define HOPEPAGE_USE_PIC	(0)
 #define COUNTDOWN_CNT_60S (60)    // s
 #define WIFI_PASSWORD_MIN_LEN (8)    // s
+
+typedef enum {
+    ABOUT_INFO_PRODUCT_MODEL,
+    ABOUT_INFO_SOFTWARE_VERSION,
+    ABOUT_INFO_FIRMWARE_VERSION,
+    ABOUT_INFO_SN_NUMBER,
+    ABOUT_INFO_IP_ADDRESS,
+    ABOUT_INFO_MAC_ADDRES,
+} about_info_type_e;
 
 typedef struct _sta_scan_res
 {
