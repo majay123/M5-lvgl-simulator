@@ -31,7 +31,7 @@
  * @Author       : MCD
  * @Date         : 2023-05-26 14:05:40
  * @LastEditors  : MCD
- * @LastEditTime : 2023-06-24 14:37:46
+ * @LastEditTime : 2023-06-28 11:04:56
  * @FilePath     : /M5-lvgl-simulator/main/src/testapp/gui_guider.h
  * @Description  : 
  * 
@@ -68,6 +68,8 @@ extern "C" {
 #define HOPEPAGE_USE_PIC	(0)
 #define COUNTDOWN_CNT_60S (60)    // s
 #define WIFI_PASSWORD_MIN_LEN (8)    // s
+#define GET_QRCODE_TIMEOUT       (1)
+#define GET_QRCODE_MAX_COUNT     (5)
 
 typedef enum {
     ABOUT_INFO_PRODUCT_MODEL,
@@ -109,6 +111,7 @@ typedef struct
     lv_obj_t *devices_list;
     lv_obj_t *qr;
     lv_obj_t *menu;
+    lv_obj_t *tip_lable;
     bool Setting_del;
 
     lv_obj_t *AddDevice;
@@ -127,6 +130,14 @@ typedef struct
     sta_scan_res_t wifi_select;
 } lv_ui;
 
+typedef enum {
+    SETTING_MENU_WIFI_PAGE = 0,
+    SETTING_MENU_BAND_PAGE,
+    SETTING_MENU_MAIN_PAGE,
+    SETTING_MENU_SYS_UPDATE_PAGE,
+    SETTING_MENU_ABOUT_PAGE,
+} setting_menu_page_e;
+
 void init_scr_del_flag(lv_ui *ui);
 void setup_ui(lv_ui *ui);
 extern lv_ui guider_ui;
@@ -134,12 +145,19 @@ void setup_scr_HomePage(lv_ui *ui);
 void setup_scr_Setting(lv_ui *ui);
 void setup_scr_AddDevice(lv_ui *ui);
 void ui_wifi_set(lv_ui *ui);
+// void setup_scr_Startup_on(lv_ui *ui);
+
 LV_IMG_DECLARE(bg);
 LV_FONT_DECLARE(HanSansCN_20);
 LV_IMG_DECLARE(light_knob);
 LV_IMG_DECLARE(curtain_knob);
 LV_IMG_DECLARE(curtain_slider);
 LV_IMG_DECLARE(w_sunny);
+LV_IMG_DECLARE(ic_wifi1);
+LV_IMG_DECLARE(ic_wifi2);
+LV_IMG_DECLARE(ic_wifi3);
+LV_IMG_DECLARE(ic_lock);
+LV_IMG_DECLARE(startup_pic);
 
 
 #ifdef __cplusplus

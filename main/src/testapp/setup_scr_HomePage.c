@@ -939,7 +939,7 @@ void setup_scr_HomePage(lv_ui *ui)
 		lv_style_reset(&style_homepage_main_main_default);
 	else
 		lv_style_init(&style_homepage_main_main_default);
-	lv_style_set_bg_opa(&style_homepage_main_main_default, 255);
+	// lv_style_set_bg_opa(&style_homepage_main_main_default, 255);
 	lv_style_set_bg_img_src(&style_homepage_main_main_default, &bg);
 	lv_obj_add_style(ui->HomePage, &style_homepage_main_main_default, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_add_event_cb(ui->HomePage, HomePage_gesture_event_handler, LV_EVENT_GESTURE, ui); // 在此处监听，处理最上层的滑动

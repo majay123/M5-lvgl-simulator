@@ -54,13 +54,19 @@ char about_info[][32] = {
     "MAC 地址：",
 };
 
+static lv_timer_t *qr_timer = NULL;
+static int get_qr_count = 0;
+
+
 static void _lv_wifi_click_event_cb(lv_event_t *e);
+static lv_obj_t *_wifi_list_add_item(lv_ui *ui, lv_obj_t *wifi_list, st_wifi *scan_ap, const char *link_ssid);
 
 static void back_event_handler(lv_event_t *e)
 {
     lv_obj_t *obj = lv_event_get_target(e);         // 获取产生事件的对象
     lv_ui *ui = lv_event_get_user_data(e);          // 获取用户数据
     if (lv_menu_back_btn_is_root(ui->menu, obj)) {  // 根菜单的返回键
+
         lv_obj_t *act_scr = lv_scr_act();
         lv_disp_t *d = lv_obj_get_disp(act_scr);
         if (d->prev_scr == NULL && (d->scr_to_load == NULL || d->scr_to_load == act_scr)) {
@@ -86,7 +92,42 @@ static void _menu_event_cb(lv_event_t *e)
 static void _setting_clicked_event_cb(lv_event_t *e)
 {
     lv_obj_t *obj = lv_event_get_target(e);
-    printf("menu clicked: %d\n", lv_obj_get_index(obj));
+    uint32_t index = lv_obj_get_index(obj);
+    lv_ui *ui = (lv_ui *)lv_event_get_user_data(e);
+    printf("menu clicked: %d\n", index);
+    if (index == 1) {
+        lv_timer_reset(qr_timer);
+        lv_timer_resume(qr_timer);
+    }
+
+    switch (index) {
+        case SETTING_MENU_WIFI_PAGE: {
+#if WEATHER_OPEN_WIFI_SCAN_TIMER
+            if (wifi_scan_timer != NULL) {
+                lv_timer_resume(wifi_scan_timer);
+            }
+#endif
+            // os_printf("wifi scan start\n");
+            // bk_wifi_scan_start(NULL);
+            break;
+        }
+        case SETTING_MENU_BAND_PAGE: {
+            // send_event_simple_msg(messageType_MSGCODE_GET_QRCODE_REQ);
+            printf("SETTING_MENU_BAND_PAGE\n");
+            if (qr_timer) {
+                lv_timer_resume(qr_timer);  //启动定时器定时器
+                lv_timer_reset(qr_timer);   //复位回调周期的时间
+            }
+            break;
+        }
+        case SETTING_MENU_MAIN_PAGE: {
+            printf("SETTING_MENU_MAIN_PAGE\n");
+            // send_event_simple_msg(messageType_MSGCODE_POP_TOTAL_DEVICE_ACTION_REQ);
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 static lv_obj_t *create_text(lv_obj_t *parent, const char *txt)
@@ -186,9 +227,24 @@ static void _lv_qr_click_event_cb(lv_event_t *e)
     static int click_i = 0;
     char buf[128] = {0};
 
+    // printf("qr click event: %d\n", lv_event_get_code(e));
+    // snprintf(buf, sizeof(buf), "qr click event: %d", click_i++);
+    // lv_qrcode_update(ui->qr, buf, strlen(buf));
+    lv_obj_clear_flag(ui->tip_lable, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ui->qr, LV_OBJ_FLAG_HIDDEN);
+}
+
+static void _lv_tip_click_event_cb(lv_event_t *e)
+{
+    lv_ui *ui = lv_event_get_user_data(e);
+    static int click_i = 0;
+    char buf[128] = {0};
+
     printf("qr click event: %d\n", lv_event_get_code(e));
     snprintf(buf, sizeof(buf), "qr click event: %d", click_i++);
     lv_qrcode_update(ui->qr, buf, strlen(buf));
+    lv_obj_add_flag(ui->tip_lable, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_clear_flag(ui->qr, LV_OBJ_FLAG_HIDDEN);
 }
 
 static void event_cb(lv_event_t *e)
@@ -249,17 +305,56 @@ static void _devices_checkbox_cb(lv_event_t *e)
     }
 }
 
+
+static void _update_event_cb(lv_event_t *e)
+{
+    lv_obj_t *obj = lv_event_get_current_target(e);
+    // os_printf("Button %s clicked", lv_msgbox_get_active_btn_text(obj));
+    if (lv_msgbox_get_active_btn_text(obj) == "确认") {
+        // todo update
+        printf("========== update now\n");
+        lv_obj_t *btn = lv_event_get_target(e);
+        lv_obj_t *mbox = lv_obj_get_parent(btn);
+        lv_msgbox_close(mbox);
+        ui_lv_msgbox_warning_create("设备正在升级，请勿断电，升级过程中设备将会黑屏。", 5);
+    }
+    else if (lv_msgbox_get_active_btn_text(obj) == "取消") {
+        lv_obj_t *btn = lv_event_get_target(e);
+        lv_obj_t *mbox = lv_obj_get_parent(btn);
+        lv_msgbox_close(mbox);
+    }
+}
+
 static void _ota_btn_event_cb(lv_event_t *e)
 {
     lv_obj_t *obj = lv_event_get_target(e);
     lv_ui *ui = lv_event_get_user_data(e);
 
     printf("ota button event: %d\n", lv_event_get_code(e));
+    ui_lv_msgbox_sure_create("发现新版本，是否确认升级？", _update_event_cb, ui);
 }
+
+static void _qrcode_timer_callback(lv_timer_t *t)
+{
+    printf("qrcode get\n");
+    get_qr_count++;
+    if (get_qr_count > GET_QRCODE_MAX_COUNT) {
+        printf("qrcode get failed, out of count\n");
+        lv_timer_pause(qr_timer);
+        get_qr_count = 0;
+        lv_ui *ui = t->user_data;
+        lv_obj_clear_flag(ui->tip_lable, LV_OBJ_FLAG_HIDDEN);
+        lv_label_set_text(ui->tip_lable, "网络超时，请检查网络。");
+        lv_obj_add_flag(ui->qr, LV_OBJ_FLAG_HIDDEN);
+    }
+    // else
+    // send_event_simple_msg(messageType_MSGCODE_GET_QRCODE_REQ);
+}
+
 
 static lv_obj_t *_lv_creat_about_page(lv_ui *ui, lv_obj_t *title_section)
 {
-    char buf[128*2] = {0};
+    char buf[128 * 2] = {0};
     lv_obj_t *about_page = lv_menu_page_create(ui->menu, NULL);                                                // 创建菜单界面
     lv_obj_set_style_pad_hor(about_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(ui->menu), 0), 0);  // 设置水平PAD间距
     lv_obj_t *cont = create_text(title_section, "关于");                                                       // 创建Mechanics菜单子项
@@ -495,6 +590,23 @@ static void _lv_creat_set_mainpage_page(lv_ui *ui, lv_obj_t *title_section)
     lv_obj_set_style_border_width(ui->qr, 5, 0);
     lv_obj_add_flag(ui->qr, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(ui->qr, _lv_qr_click_event_cb, LV_EVENT_CLICKED, ui);
+    lv_obj_add_flag(ui->qr, LV_OBJ_FLAG_HIDDEN);
+
+    ui->tip_lable = lv_label_create(mainpage_cont);
+    lv_label_set_text(ui->tip_lable, "设备准备中...");
+    lv_obj_set_pos(ui->tip_lable, 0, 220);
+    lv_obj_set_size(ui->tip_lable, 300, 25);
+    lv_obj_set_style_text_color(ui->tip_lable, lv_color_hex(0xffffff), 0);
+    lv_obj_set_style_text_font(ui->tip_lable, &HanSansCN_20, 0);
+    lv_obj_add_flag(ui->tip_lable, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(ui->tip_lable, _lv_tip_click_event_cb, LV_EVENT_CLICKED, ui);
+    lv_obj_set_style_text_align(ui->tip_lable, LV_TEXT_ALIGN_CENTER, 0);
+    // lv_obj_add_flag(ui->tip_lable, LV_OBJ_FLAG_HIDDEN);
+}
+
+static void msgbox_del(lv_timer_t * tmr)
+{
+    lv_msgbox_close(tmr->user_data);
 }
 
 static void _lv_wifi_click_event_cb(lv_event_t *e)
@@ -510,9 +622,16 @@ static void _lv_wifi_click_event_cb(lv_event_t *e)
     uint32_t index = lv_obj_get_index(wifi_tag);
     // ui->wifi_selected = index;
 
-    printf("wifi_tag: %d\n", index);
-    memcpy(ui->wifi_select.ssid, st_wifi_item[index].wifi_name, strlen(st_wifi_item[index].wifi_name));
+    printf("wifi_tag: %d, %s\n", index, st_wifi_item[index].wifi_name);
 
+    lv_obj_t *obj = lv_msgbox_create(NULL, "提示", "连接失败，请检查密码是否正确。", NULL, false);
+    lv_obj_set_style_text_font(obj, &HanSansCN_20, 0);
+    lv_obj_center(obj);
+
+    lv_timer_t * msgbox_tmr = lv_timer_create(msgbox_del, 1000 * 2, obj);
+    lv_timer_set_repeat_count(msgbox_tmr, 1);
+#if 0
+    memcpy(ui->wifi_select.ssid, st_wifi_item[index].wifi_name, strlen(st_wifi_item[index].wifi_name));
     lv_obj_t *act_scr = lv_scr_act();
     lv_disp_t *d = lv_obj_get_disp(act_scr);
     if (d->prev_scr == NULL && (d->scr_to_load == NULL || d->scr_to_load == act_scr)) {
@@ -522,6 +641,65 @@ static void _lv_wifi_click_event_cb(lv_event_t *e)
         lv_scr_load_anim(ui->Wifi_Set, LV_SCR_LOAD_ANIM_NONE, 0, 0, true);
         ui->Setting_del = true;
     }
+#endif
+}
+static lv_obj_t *_wifi_list_add_item(lv_ui *ui, lv_obj_t *wifi_list, st_wifi *scan_ap, const char *link_ssid)
+{
+    lv_obj_t *wifi_item = lv_obj_create(wifi_list);
+
+    if (wifi_item == NULL) {
+        return NULL;
+    }
+
+    lv_obj_set_size(wifi_item, 300, 50);
+    lv_obj_set_style_bg_opa(wifi_item, LV_OPA_COVER, 0);
+    lv_obj_set_style_pad_all(wifi_item, 0, 0);
+    lv_obj_set_style_border_width(wifi_item, 0, 0);
+    lv_obj_add_flag(wifi_item, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_style_bg_color(wifi_item, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(wifi_item, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_FOCUSED);
+
+    lv_obj_t *wifi_name = lv_label_create(wifi_item);
+    lv_label_set_text(wifi_name, (const char *)scan_ap->wifi_name);
+    lv_label_set_long_mode(wifi_name, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_pos(wifi_name, 10, 2);
+    lv_obj_set_size(wifi_name, 200, 24);
+    lv_obj_set_style_opa(wifi_name, LV_OPA_COVER, 0);
+    lv_obj_set_style_text_color(wifi_name, lv_color_hex(0xffffff), 0);
+
+    // wifi st
+    lv_obj_t *wifi_st = lv_label_create(wifi_item);
+    if (strcmp(scan_ap->wifi_name, link_ssid) == 0)
+        lv_label_set_text(wifi_st, "已连接");
+    else
+        lv_label_set_text(wifi_st, "未连接");
+    lv_obj_set_pos(wifi_st, 10, 26);
+    lv_obj_set_size(wifi_st, 100, 24);
+    lv_obj_set_style_opa(wifi_st, LV_OPA_COVER, 0);
+    lv_obj_set_style_text_color(wifi_st, lv_color_hex(0xffffff), 0);
+    // wifi dbm
+    lv_obj_t *wifi_dbm = lv_img_create(wifi_item);
+    if (scan_ap->wifi_dbm == 1) {
+        lv_img_set_src(wifi_dbm, &ic_wifi3);
+    }
+    else if (scan_ap->wifi_dbm == 2) {
+        lv_img_set_src(wifi_dbm, &ic_wifi2);
+    }
+    else {
+        lv_img_set_src(wifi_dbm, &ic_wifi1);
+    }
+    lv_obj_set_pos(wifi_dbm, 250, 5);
+
+    // wifi password
+    if (scan_ap->lock_st != false) {
+        lv_obj_t *wifi_lock = lv_img_create(wifi_item);
+        lv_img_set_src(wifi_lock, &ic_lock);
+        lv_obj_set_pos(wifi_lock, 275, 9);
+    }
+
+    lv_obj_add_event_cb(wifi_item, _lv_wifi_click_event_cb, LV_EVENT_CLICKED, ui);
+
+    return wifi_item;
 }
 
 /**********************************************************************
@@ -579,8 +757,8 @@ static void _lv_creat_wifi_page(lv_ui *ui, lv_obj_t *title_section)
 
     // test wifi item
     for (size_t i = 0; i < ARRAY_SIZE(st_wifi_item); i++) {
-        lv_obj_t *wifi_item = lv_obj_create(ui->wifi_list);
-        lv_obj_set_pos(wifi_item, 0, 0);
+#if 0
+        wifi_item = lv_obj_create(ui->wifi_list);
         lv_obj_set_style_pad_all(wifi_item, 0, 0);
         lv_obj_set_style_border_width(wifi_item, 0, 0);
         // LV_STATE_CHECKED
@@ -630,6 +808,9 @@ static void _lv_creat_wifi_page(lv_ui *ui, lv_obj_t *title_section)
             lv_obj_set_pos(wifi_lock, 275, 9);
         }
         lv_obj_add_event_cb(wifi_item, _lv_wifi_click_event_cb, LV_EVENT_CLICKED, ui);
+#else
+        _wifi_list_add_item(ui, ui->wifi_list, &st_wifi_item[i], "vsdfgvdfg");
+#endif
     }
 }
 
@@ -683,6 +864,15 @@ static void _lv_create_setting_menu(lv_ui *ui)
     lv_event_send(lv_obj_get_child(lv_obj_get_child(lv_menu_get_cur_sidebar_page(ui->menu), 0), 0), LV_EVENT_CLICKED, NULL);
     lv_obj_add_event_cb(ui->menu, back_event_handler, LV_EVENT_CLICKED, ui);  // 添加返回键点击事件
     lv_obj_add_event_cb(ui->menu, _menu_event_cb, LV_EVENT_VALUE_CHANGED, ui);
+
+    if (qr_timer != NULL) {
+        lv_timer_del(qr_timer);
+        qr_timer = NULL;
+    }
+    qr_timer = lv_timer_create(_qrcode_timer_callback, 1000 * GET_QRCODE_TIMEOUT, ui);
+    if(qr_timer != NULL){
+        lv_timer_pause(qr_timer);
+    }
 }
 
 /**********************************************************************
@@ -708,6 +898,8 @@ void setup_scr_Setting(lv_ui *ui)
         lv_style_init(&style_setting_main_main_default);
     lv_style_set_bg_opa(&style_setting_main_main_default, LV_OPA_TRANSP);
     lv_obj_add_style(ui->Setting, &style_setting_main_main_default, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+
 
     _lv_create_setting_menu(ui);
 }

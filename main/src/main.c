@@ -103,6 +103,7 @@ int main(int argc, char **argv)
     // lv_example_keyboard_1();
     // lv_example_checkbox_1();
     // lv_example_msgbox_1();
+    // lv_demo_stress();
 
     while (1) {
         /* Periodically call the lv_task handler.
