@@ -225,6 +225,13 @@ typedef union {
     uint16_t full;
 } lv_color16_t;
 
+
+typedef struct {
+    uint8_t blue;
+    uint8_t green;
+    uint8_t red;
+} lv_color24_t;
+
 typedef union {
     struct {
         uint8_t blue;
@@ -286,6 +293,32 @@ typedef enum {
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
+
+
+static inline void lv_color8_set_int(lv_color8_t * c, uint8_t v)
+{
+    *((uint8_t *)c) = v;
+}
+
+static inline void lv_color16_set_int(lv_color16_t * c, uint16_t v)
+{
+    *((uint16_t *)c) = v;
+}
+
+static inline void lv_color24_set_int(lv_color24_t * c, uint32_t v)
+{
+    lv_memcpy(c, &v, 3);
+}
+
+static inline void lv_color32_set_int(lv_color32_t * c, uint32_t v)
+{
+    *(uint32_t *)c = v;
+}
+
+static inline void lv_color_set_int(lv_color_t * c, uint32_t v)
+{
+    LV_CONCAT3(lv_color, LV_COLOR_DEPTH, _set_int(c, v));
+}
 
 /*In color conversations:
  * - When converting to bigger color type the LSB weight of 1 LSB is calculated

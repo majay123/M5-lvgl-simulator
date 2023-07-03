@@ -6,6 +6,14 @@
         "string": "c",
         "string_view": "c",
         "vector": "c",
-        "gui_guider.h": "c"
+        "gui_guider.h": "c",
+        "lv_barcode.h": "c",
+        "lv_ffmpeg.h": "c",
+        "ui.h": "c",
+        "lvgl.h": "c",
+        "lv_demos.h": "c",
+        "lv_qrcode.h": "c",
+        "lv_mem.h": "c",
+        "lv_color.h": "c"
     }
 }

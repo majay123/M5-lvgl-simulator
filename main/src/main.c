@@ -74,6 +74,27 @@ void lv_ex_imgbtn_1(void)
     // lv_label_set_text(label, "Button");
 }
 
+void lv_example_barcode_1(void)
+{
+    lv_color_t bg_color = lv_palette_lighten(LV_PALETTE_LIGHT_BLUE, 5);
+    lv_color_t fg_color = lv_palette_darken(LV_PALETTE_BLUE, 4);
+
+    lv_obj_t * barcode = lv_barcode_create(lv_scr_act());
+    lv_obj_set_height(barcode, 50);
+    lv_obj_center(barcode);
+
+    /*Set color*/
+    lv_barcode_set_dark_color(barcode, (lv_color32_t)lv_color_to32(lv_color_hex(0x000000)));
+    lv_barcode_set_light_color(barcode, (lv_color32_t)lv_color_to32(lv_color_hex(0xffffff)));
+
+    /*Add a border with bg_color*/
+    lv_obj_set_style_border_color(barcode, lv_color_hex(0xffffff), 0);
+    lv_obj_set_style_border_width(barcode, 5, 0);
+
+    /*Set data*/
+    lv_barcode_update(barcode, "https://lvgl.io");
+}
+
 int main(int argc, char **argv)
 {
     (void)argc; /*Unused*/
@@ -84,8 +105,8 @@ int main(int argc, char **argv)
 
     /*Initialize the HAL (display, input devices, tick) for LVGL*/
     hal_init();
-    memset(&guider_ui, 0, sizeof(guider_ui));
-    setup_ui(&guider_ui);
+    // memset(&guider_ui, 0, sizeof(guider_ui));
+    // setup_ui(&guider_ui);
     // lv_ex_imgbtn_1();
     //init_ui();
     //lv_demo_benchmark();
@@ -104,6 +125,7 @@ int main(int argc, char **argv)
     // lv_example_checkbox_1();
     // lv_example_msgbox_1();
     // lv_demo_stress();
+    lv_example_barcode_1();
 
     while (1) {
         /* Periodically call the lv_task handler.
