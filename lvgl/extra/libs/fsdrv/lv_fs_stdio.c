@@ -108,6 +108,8 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
     char buf[256];
     lv_snprintf(buf, sizeof(buf), LV_FS_STDIO_PATH "%s", path);
 
+    printf("buf: %s\n", buf);
+
     return fopen(buf, flags);
 }
 

@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "../lvgl.h"
 #include "../misc/lv_fs.h"
@@ -79,14 +80,15 @@ static unsigned int read_bits(bit_iterator_t * it, int n_bits, lv_fs_res_t * res
  **********************/
 
 /**
- * Loads a `lv_font_t` object from a binary font file
  * @param font_name filename where the font file is located
  * @return a pointer to the font or NULL in case of error
+ * Loads a `lv_font_t` object from a binary font file
  */
 lv_font_t * lv_font_load(const char * font_name)
 {
     lv_fs_file_t file;
     lv_fs_res_t res = lv_fs_open(&file, font_name, LV_FS_MODE_RD);
+    printf("ret = %d\n", res);
     if(res != LV_FS_RES_OK)
         return NULL;
 

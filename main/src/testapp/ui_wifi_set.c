@@ -31,7 +31,7 @@
  * @Author       : MCD
  * @Date         : 2023-06-05 10:15:01
  * @LastEditors  : MCD
- * @LastEditTime : 2023-06-20 09:28:43
+ * @LastEditTime : 2023-07-17 13:34:03
  * @FilePath     : /M5-lvgl-simulator/main/src/testapp/ui_wifi_set.c
  * @Description  : 
  * 
@@ -186,7 +186,11 @@ void ui_wifi_set(lv_ui *ui)
     lv_obj_set_style_shadow_opa(ui->wifi_c_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     label = lv_label_create(ui->wifi_c_btn);
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(label, my_font, 0);
+#else
     lv_obj_set_style_text_font(label, &HanSansCN_20, 0);
+#endif
     if (ui->wifi_select.remember == 0)
         lv_label_set_text(label, "取消");
     else
@@ -210,7 +214,11 @@ void ui_wifi_set(lv_ui *ui)
     lv_obj_set_style_shadow_opa(ui->wifi_ok_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     label = lv_label_create(ui->wifi_ok_btn);
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(label, my_font, 0);
+#else
     lv_obj_set_style_text_font(label, &HanSansCN_20, 0);
+#endif
     lv_label_set_text(label, "连接");
     lv_obj_center(label);
 

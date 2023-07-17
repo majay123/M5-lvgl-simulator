@@ -45,6 +45,18 @@ st_wifi st_wifi_item[] = {
     {.lock_st = true, .wifi_name = "huonfgdnfg", .connect_st = "connecting", .wifi_dbm = 1},
 };
 
+st_wifi st_wifi_item1[] = {
+    {.lock_st = true, .wifi_name = "ads", .connect_st = "connect", .wifi_dbm = 1},
+    {.lock_st = true, .wifi_name = "aad", .connect_st = "error", .wifi_dbm = 2},
+    {.lock_st = false, .wifi_name = "cagf", .connect_st = "error", .wifi_dbm = 3},
+    {.lock_st = true, .wifi_name = "cas", .connect_st = "error", .wifi_dbm = 3},
+    {.lock_st = false, .wifi_name = "dagdff", .connect_st = "error", .wifi_dbm = 2},
+    {.lock_st = true, .wifi_name = "cadasdf", .connect_st = "error", .wifi_dbm = 2},
+    {.lock_st = true, .wifi_name = "wifiname", .connect_st = "error", .wifi_dbm = 1},
+    {.lock_st = true, .wifi_name = "gsdfgsfd", .connect_st = "error", .wifi_dbm = 1},
+    {.lock_st = false, .wifi_name = "adasdfsa", .connect_st = "error", .wifi_dbm = 1},
+};
+
 char about_info[][32] = {
     "产品型号：",
     "软件版本：",
@@ -56,10 +68,11 @@ char about_info[][32] = {
 
 static lv_timer_t *qr_timer = NULL;
 static int get_qr_count = 0;
-
+static bool hide_flag = false;
 
 static void _lv_wifi_click_event_cb(lv_event_t *e);
-static lv_obj_t *_wifi_list_add_item(lv_ui *ui, lv_obj_t *wifi_list, st_wifi *scan_ap, const char *link_ssid);
+static void _wifi_list_add_item(lv_ui *ui, lv_obj_t *wifi_list, st_wifi *scan_ap, const char *link_ssid);
+static void _lv_create_device_item(lv_ui *ui, size_t index);
 
 static void back_event_handler(lv_event_t *e)
 {
@@ -106,9 +119,14 @@ static void _setting_clicked_event_cb(lv_event_t *e)
             if (wifi_scan_timer != NULL) {
                 lv_timer_resume(wifi_scan_timer);
             }
-#endif
-            // os_printf("wifi scan start\n");
-            // bk_wifi_scan_start(NULL);
+#endif  
+            // printf("tar", )
+            // lv_obj_clean(ui->wifi_list);
+            lv_obj_clean(ui->devices_list);
+            for (size_t i = 0; i < ARRAY_SIZE(st_wifi_item); i++) {
+                // printf("create wifi item: [%d]%s\n", i, st_wifi_item[i].wifi_name);
+                _wifi_list_add_item(ui, ui->wifi_list, &st_wifi_item[i], NULL);
+            }
             break;
         }
         case SETTING_MENU_BAND_PAGE: {
@@ -121,12 +139,42 @@ static void _setting_clicked_event_cb(lv_event_t *e)
             break;
         }
         case SETTING_MENU_MAIN_PAGE: {
+            lv_obj_clean(ui->wifi_list);
+            lv_obj_clean(ui->devices_list);
             printf("SETTING_MENU_MAIN_PAGE\n");
+            for (size_t i = 0; i < 30; i++) {
+                _lv_create_device_item(ui, i);
+    }
             // send_event_simple_msg(messageType_MSGCODE_POP_TOTAL_DEVICE_ACTION_REQ);
             break;
         }
+        case SETTING_MENU_SYS_UPDATE_PAGE: {
+        case SETTING_MENU_ABOUT_PAGE: 
+            lv_obj_clean(ui->wifi_list);
+            lv_obj_clean(ui->devices_list);
+        }
         default:
             break;
+    }
+}
+
+static void _setting_clicked_get_barcode_cb(lv_event_t *e)
+{
+    lv_obj_t *barcode = (lv_obj_t *)lv_event_get_user_data(e);
+    lv_event_code_t code = lv_event_get_code(e);
+
+
+    if(code == LV_EVENT_CLICKED) {
+        if (hide_flag == false) {
+            printf("show bar code \n");
+            lv_obj_clear_flag(barcode, LV_OBJ_FLAG_HIDDEN);
+            hide_flag = true;
+        }
+        else {
+            printf("hide bar code \n");
+            lv_obj_add_flag(barcode, LV_OBJ_FLAG_HIDDEN);
+            hide_flag = false;
+        }
     }
 }
 
@@ -140,7 +188,11 @@ static lv_obj_t *create_text(lv_obj_t *parent, const char *txt)
 
     if (txt) {
         label = lv_label_create(obj);                                  // 创建label
+    #if LV_USE_MY_FONT
+        lv_obj_set_style_text_font(label, my_font, 0);
+    #else
         lv_obj_set_style_text_font(label, &HanSansCN_20, 0);
+    #endif
         lv_label_set_text(label, txt);                                 // 设置label显示内容
         lv_obj_set_style_text_color(label, lv_color_hex(0xffffff), 0);
         lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);  // 循环滚动模式
@@ -245,19 +297,21 @@ static void _lv_tip_click_event_cb(lv_event_t *e)
     lv_qrcode_update(ui->qr, buf, strlen(buf));
     lv_obj_add_flag(ui->tip_lable, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(ui->qr, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_clear_flag(ui->reset_btn, LV_OBJ_FLAG_HIDDEN);
 }
 
-static void event_cb(lv_event_t *e)
+static void _event_cb(lv_event_t *e)
 {
     lv_obj_t *obj = lv_event_get_current_target(e);
     LV_UNUSED(obj);
     LV_LOG_USER("Button %s clicked", lv_msgbox_get_active_btn_text(obj));
+    lv_obj_t *btn = lv_event_get_target(e);
+    lv_obj_t *mbox = lv_obj_get_parent(btn);
     if (lv_msgbox_get_active_btn_text(obj) == "确认") {
         printf("delete select devices\n");
+        lv_msgbox_close(mbox);
     }
     else if (lv_msgbox_get_active_btn_text(obj) == "取消") {
-        lv_obj_t *btn = lv_event_get_target(e);
-        lv_obj_t *mbox = lv_obj_get_parent(btn);
         lv_msgbox_close(mbox);
     }
 }
@@ -270,8 +324,45 @@ static void _delete_devices_event_cb(lv_event_t *e)
     printf("delete devices event: %d\n", lv_event_get_code(e));
 
     lv_obj_t *mbox1 = lv_msgbox_create(NULL, "提示", "确认是否要删除设备？", btns, false);
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(mbox1, my_font, 0);
+#else
     lv_obj_set_style_text_font(mbox1, &HanSansCN_20, 0);
-    lv_obj_add_event_cb(mbox1, event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+#endif
+    lv_obj_add_event_cb(mbox1, _event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_center(mbox1);
+}
+
+static void _reset_event_cb(lv_event_t *e)
+{
+    lv_obj_t *obj = lv_event_get_current_target(e);
+    LV_UNUSED(obj);
+    LV_LOG_USER("Button %s clicked", lv_msgbox_get_active_btn_text(obj));
+    lv_obj_t *btn = lv_event_get_target(e);
+    lv_obj_t *mbox = lv_obj_get_parent(btn);
+    if (lv_msgbox_get_active_btn_text(obj) == "确认") {
+        printf("reset gw\n");
+        lv_msgbox_close(mbox);
+    }
+    else if (lv_msgbox_get_active_btn_text(obj) == "取消") {
+        lv_msgbox_close(mbox);
+    }
+}
+
+static void _reset_gw_event_cb(lv_event_t *e)
+{
+    static const char *btns[] = {"取消", "确认", ""};
+    lv_ui *ui = (lv_ui *)lv_event_get_user_data(e);
+    // lv_obj_t * obj = lv_event_get_target(e);
+    printf("delete devices event: %d\n", lv_event_get_code(e));
+
+    lv_obj_t *mbox1 = lv_msgbox_create(NULL, "提示", "重置网关会清空所有子设备信息，是否确认?", btns, false);
+#if LV_USE_MY_FONT 
+    lv_obj_set_style_text_font(mbox1, my_font, 0);
+#else
+    lv_obj_set_style_text_font(mbox1, &HanSansCN_20, 0);
+#endif
+    lv_obj_add_event_cb(mbox1, _reset_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_obj_center(mbox1);
 }
 
@@ -280,15 +371,15 @@ static void _device_item_event_cb(lv_event_t *e)
     // printf("this device is checked\n");
     lv_obj_t *obj = lv_event_get_target(e);
     printf("devices list index: %d\n", lv_obj_get_index(obj));
-    lv_obj_t *checkbox = lv_obj_get_child(obj, 1);
-    if (lv_obj_has_state(checkbox, LV_STATE_CHECKED)) {
-        printf("this device is not checked\n");
-        lv_obj_clear_state(checkbox, LV_STATE_CHECKED);
-    }
-    else {
-        printf("this device is checked\n");
-        lv_obj_add_state(checkbox, LV_STATE_CHECKED);
-    }
+    // lv_obj_t *checkbox = lv_obj_get_child(obj, 1);
+    // if (lv_obj_has_state(checkbox, LV_STATE_CHECKED)) {
+    //     printf("this device is not checked\n");
+    //     lv_obj_clear_state(checkbox, LV_STATE_CHECKED);
+    // }
+    // else {
+    //     printf("this device is checked\n");
+    //     lv_obj_add_state(checkbox, LV_STATE_CHECKED);
+    // }
 }
 
 static void _devices_checkbox_cb(lv_event_t *e)
@@ -304,7 +395,6 @@ static void _devices_checkbox_cb(lv_event_t *e)
         printf("this device is not checked\n");
     }
 }
-
 
 static void _update_event_cb(lv_event_t *e)
 {
@@ -351,16 +441,20 @@ static void _qrcode_timer_callback(lv_timer_t *t)
     // send_event_simple_msg(messageType_MSGCODE_GET_QRCODE_REQ);
 }
 
-
-static lv_obj_t *_lv_creat_about_page(lv_ui *ui, lv_obj_t *title_section)
+static void _lv_creat_about_page(lv_ui *ui, lv_obj_t *title_section)
 {
     char buf[128 * 2] = {0};
+#if SETTING_UI_SHOW_BARCODE
+    lv_obj_t *barcode = NULL;
+#endif
+
     lv_obj_t *about_page = lv_menu_page_create(ui->menu, NULL);                                                // 创建菜单界面
     lv_obj_set_style_pad_hor(about_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(ui->menu), 0), 0);  // 设置水平PAD间距
     lv_obj_t *cont = create_text(title_section, "关于");                                                       // 创建Mechanics菜单子项
     lv_menu_set_load_page_event(ui->menu, cont, about_page);
     lv_obj_add_event_cb(cont, _setting_clicked_event_cb, LV_EVENT_CLICKED, ui);
 
+#if 1
     lv_menu_separator_create(about_page);                    // ui->menu separator
     lv_obj_t *section = lv_menu_section_create(about_page);  // Create a ui->menu section object
 
@@ -391,11 +485,33 @@ static lv_obj_t *_lv_creat_about_page(lv_ui *ui, lv_obj_t *title_section)
         lv_obj_set_style_bg_opa(about_item, 0, 0);
 
         lv_obj_t *about_name = lv_label_create(about_item);
+    #if LV_USE_MY_FONT
+        lv_obj_set_style_text_font(about_name, my_font, 0);
+    #else
         lv_obj_set_style_text_font(about_name, &HanSansCN_20, 0);
+    #endif
         lv_obj_set_pos(about_name, 15, 4);
         lv_obj_set_size(about_name, 280, 24);
-        lv_obj_set_style_opa(about_name, LV_OPA_COVER, 0);
+        // lv_obj_set_style_opa(about_name, LV_OPA_COVER, 0);
         lv_obj_set_style_text_color(about_name, lv_color_hex(0xffffff), 0);
+#if SETTING_UI_SHOW_BARCODE
+        if(i == ABOUT_INFO_SN_NUMBER) {
+            barcode = lv_barcode_create(about_item);
+            // lv_obj_center(barcode);
+
+            /*Set color*/
+            lv_barcode_set_dark_color(barcode, (lv_color32_t)lv_color_to32(lv_color_hex(0x000000)));
+            lv_barcode_set_light_color(barcode, (lv_color32_t)lv_color_to32(lv_color_hex(0xffffff)));
+
+            /*Add a border with bg_color*/
+            lv_obj_set_style_border_color(barcode, lv_color_hex(0x000000), 0);
+            lv_obj_set_style_border_width(barcode, 5, 0);
+
+            lv_obj_set_height(barcode, 50);
+            lv_obj_set_pos(barcode, 105, -10);
+            // lv_barcode_update(barcode, "test1122334455");
+        }
+#endif
         switch (i) {
             case ABOUT_INFO_PRODUCT_MODEL: {
                 sprintf(buf, "%s%s", about_info[i], "HOPE_M5");
@@ -411,6 +527,16 @@ static lv_obj_t *_lv_creat_about_page(lv_ui *ui, lv_obj_t *title_section)
             }
             case ABOUT_INFO_SN_NUMBER: {
                 sprintf(buf, "%s  %s", about_info[i], "test1122334455");
+            #if SETTING_UI_SHOW_BARCODE
+                // lv_obj_set_size(about_item, 300, 90);
+                // lv_obj_set_pos(about_name, 15, 54);
+                if(barcode != NULL)
+                lv_barcode_update(barcode, "test1122334455");
+                lv_obj_add_flag(barcode, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_event_cb(about_item, _setting_clicked_get_barcode_cb, LV_EVENT_CLICKED, barcode);
+            #else
+                lv_obj_add_event_cb(about_item, _setting_clicked_get_barcode_cb, LV_EVENT_CLICKED, barcode);
+            #endif
                 break;
             }
             case ABOUT_INFO_IP_ADDRESS: {
@@ -426,7 +552,7 @@ static lv_obj_t *_lv_creat_about_page(lv_ui *ui, lv_obj_t *title_section)
         lv_label_set_text(about_name, buf);
     }
 
-    return about_page;
+#endif
 }
 
 static void _lv_creat_ota_page(lv_ui *ui, lv_obj_t *title_section)
@@ -436,7 +562,7 @@ static void _lv_creat_ota_page(lv_ui *ui, lv_obj_t *title_section)
     lv_obj_t *cont = create_text(title_section, "系统升级");                                                 // 创建Mechanics菜单子项
     lv_menu_set_load_page_event(ui->menu, cont, ota_page);
     lv_obj_add_event_cb(cont, _setting_clicked_event_cb, LV_EVENT_CLICKED, ui);
-
+#if 1
     lv_menu_separator_create(ota_page);                    // ui->menu separator
     lv_obj_t *section = lv_menu_section_create(ota_page);  // Create a ui->menu section
 
@@ -458,9 +584,58 @@ static void _lv_creat_ota_page(lv_ui *ui, lv_obj_t *title_section)
     lv_obj_set_style_shadow_opa(ota_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_t *label = lv_label_create(ota_btn);
+#if LV_USE_MY_FONT
+        lv_obj_set_style_text_font(label, my_font, 0);
+#else
     lv_obj_set_style_text_font(label, &HanSansCN_20, 0);
+#endif
     lv_label_set_text(label, "检测更新");
     lv_obj_center(label);
+#endif
+}
+
+static void _lv_create_device_item(lv_ui *ui, size_t index)
+{
+    int j = 0;
+    lv_obj_t *device_item = lv_obj_create(ui->devices_list);
+    lv_obj_set_pos(device_item, 0, 0);
+    lv_obj_set_scrollbar_mode(device_item, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_style_pad_all(device_item, 0, 0);
+    lv_obj_set_style_border_width(device_item, 0, 0);
+    lv_obj_set_size(device_item, 300, 20 * 3);
+    lv_obj_set_style_bg_opa(device_item, 0, 0);
+    lv_obj_add_flag(device_item, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(device_item, _device_item_event_cb, LV_EVENT_CLICKED, ui);
+
+    lv_obj_t *device_name = lv_label_create(device_item);
+    lv_label_set_text(device_name, "智能灯开关");
+    lv_obj_set_pos(device_name, 10, 2);
+    lv_obj_set_size(device_name, 100, 20 * 3 - 2);
+    // lv_obj_set_style_opa(device_name, LV_OPA_COVER, 0);
+    lv_label_set_long_mode(device_name, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_style_text_color(device_name, lv_color_hex(0xffffff), 0);
+
+    lv_obj_t *cb = lv_checkbox_create(device_item);
+    lv_obj_set_pos(cb, 250, 2);
+    lv_obj_set_scrollbar_mode(cb, LV_SCROLLBAR_MODE_OFF);
+    lv_checkbox_set_text(cb, "");
+    lv_obj_set_style_radius(cb, 0, LV_PART_INDICATOR);
+    lv_obj_set_style_border_width(cb, 2, LV_PART_INDICATOR);
+    lv_obj_set_style_border_color(cb, lv_color_hex(0xffffff), LV_PART_INDICATOR);
+    lv_obj_set_style_bg_color(cb, lv_color_hex(0x000000), LV_PART_INDICATOR);
+    lv_obj_set_style_bg_color(cb, lv_color_hex(0x000000), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_add_event_cb(cb, _devices_checkbox_cb, LV_EVENT_VALUE_CHANGED, ui);
+
+    if ((index % 2) == 0) {
+        for (j = 0; j < 2; j++) {
+            lv_obj_t *subdevice_name = lv_label_create(device_name);
+            lv_label_set_text(subdevice_name, "开关一");
+            lv_obj_set_pos(subdevice_name, 20, 20 * (j + 1));
+            // lv_obj_set_size(subdevice_name, 100, 20);
+            // lv_obj_set_style_opa(subdevice_name, LV_OPA_COVER, 0);
+            lv_obj_set_style_text_color(subdevice_name, lv_color_hex(0x999999), 0);
+        }
+    }
 }
 
 static void _lv_creat_delete_dev_page(lv_ui *ui, lv_obj_t *title_section)
@@ -472,6 +647,8 @@ static void _lv_creat_delete_dev_page(lv_ui *ui, lv_obj_t *title_section)
     lv_obj_t *cont = create_text(title_section, "解绑设备");       // 创建Mechanics菜单子项
     lv_menu_set_load_page_event(ui->menu, cont, delete_dev_page);  // 加载cont到menu,设置跳转界面wifi_page
     lv_obj_add_event_cb(cont, _setting_clicked_event_cb, LV_EVENT_CLICKED, ui);
+
+#if 1
     lv_menu_separator_create(delete_dev_page);                     // ui->menu separator
     lv_obj_t *section = lv_menu_section_create(delete_dev_page);   // Create a ui->menu section object
 
@@ -497,7 +674,11 @@ static void _lv_creat_delete_dev_page(lv_ui *ui, lv_obj_t *title_section)
     lv_obj_clear_flag(delete_btn, LV_OBJ_FLAG_SCROLLABLE);  /// Flags
     set_common_btn_style(delete_btn, 135, 40);
     lv_obj_t *label = lv_label_create(delete_btn);
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(label, my_font, 0);
+#else
     lv_obj_set_style_text_font(label, &HanSansCN_20, 0);
+#endif
     lv_label_set_text(label, "删除设备");
     lv_obj_center(label);
     lv_obj_add_event_cb(delete_btn, _delete_devices_event_cb, LV_EVENT_CLICKED, ui);
@@ -505,48 +686,9 @@ static void _lv_creat_delete_dev_page(lv_ui *ui, lv_obj_t *title_section)
     // todo 获取设备列表
     // 一键开关，窗帘，调光灯，调色温灯为一个类型
     for (size_t i = 0; i < 30; i++) {
-        int j = 0;
-        lv_obj_t *device_item = lv_obj_create(ui->devices_list);
-        lv_obj_set_pos(device_item, 0, 0);
-        lv_obj_set_scrollbar_mode(device_item, LV_SCROLLBAR_MODE_OFF);
-        lv_obj_set_style_pad_all(device_item, 0, 0);
-        lv_obj_set_style_border_width(device_item, 0, 0);
-        lv_obj_set_size(device_item, 300, 20 * 3);
-        lv_obj_set_style_bg_opa(device_item, 0, 0);
-        lv_obj_add_flag(device_item, LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_add_event_cb(device_item, _device_item_event_cb, LV_EVENT_CLICKED, ui);
-
-        lv_obj_t *device_name = lv_label_create(device_item);
-        lv_label_set_text(device_name, "智能灯开关");
-        lv_obj_set_pos(device_name, 10, 2);
-        lv_obj_set_size(device_name, 100, 20 * 3 - 2);
-        lv_obj_set_style_opa(device_name, LV_OPA_COVER, 0);
-        lv_label_set_long_mode(device_name, LV_LABEL_LONG_SCROLL_CIRCULAR);
-        lv_obj_set_style_text_color(device_name, lv_color_hex(0xffffff), 0);
-
-        lv_obj_t *cb = lv_checkbox_create(device_item);
-        lv_obj_set_pos(cb, 250, 2);
-        lv_obj_set_scrollbar_mode(cb, LV_SCROLLBAR_MODE_OFF);
-        lv_checkbox_set_text(cb, "");
-        lv_obj_set_style_radius(cb, 0, LV_PART_INDICATOR);
-        lv_obj_set_style_border_width(cb, 2, LV_PART_INDICATOR);
-        lv_obj_set_style_border_color(cb, lv_color_hex(0xffffff), LV_PART_INDICATOR);
-        lv_obj_set_style_bg_color(cb, lv_color_hex(0x000000), LV_PART_INDICATOR);
-        lv_obj_set_style_bg_color(cb, lv_color_hex(0x000000), LV_PART_INDICATOR | LV_STATE_CHECKED);
-        lv_obj_add_event_cb(cb, _devices_checkbox_cb, LV_EVENT_VALUE_CHANGED, ui);
-
-        if ((i % 2) == 0) {
-            for (j = 0; j < 2; j++) {
-                lv_obj_t *subdevice_name = lv_label_create(device_name);
-                lv_label_set_text(subdevice_name, "开关一");
-                lv_obj_set_pos(subdevice_name, 20, 20 * (j + 1));
-                lv_obj_set_size(subdevice_name, 100, 20);
-                lv_obj_set_style_opa(subdevice_name, LV_OPA_COVER, 0);
-                lv_obj_set_style_text_color(subdevice_name, lv_color_hex(0x999999), 0);
-            }
-        }
+        _lv_create_device_item(ui, i);
     }
-
+#endif
     // 二键开关，三键开关，四按键开关
 }
 
@@ -567,6 +709,7 @@ static void _lv_creat_set_mainpage_page(lv_ui *ui, lv_obj_t *title_section)
     lv_obj_t *cont = create_text(title_section, "主页配置");         // 创建Mechanics菜单子项
     lv_menu_set_load_page_event(ui->menu, cont, set_mainpage_page);  // 加载cont到menu,设置跳转界面wifi_page
 
+#if 1
     lv_menu_separator_create(set_mainpage_page);                     // ui->menu separator
     lv_obj_t *section = lv_menu_section_create(set_mainpage_page);   // Create a ui->menu section object
     lv_obj_add_event_cb(cont, _setting_clicked_event_cb, LV_EVENT_CLICKED, ui);
@@ -597,14 +740,37 @@ static void _lv_creat_set_mainpage_page(lv_ui *ui, lv_obj_t *title_section)
     lv_obj_set_pos(ui->tip_lable, 0, 220);
     lv_obj_set_size(ui->tip_lable, 300, 25);
     lv_obj_set_style_text_color(ui->tip_lable, lv_color_hex(0xffffff), 0);
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(ui->tip_lable, my_font, 0);
+#else
     lv_obj_set_style_text_font(ui->tip_lable, &HanSansCN_20, 0);
+#endif
     lv_obj_add_flag(ui->tip_lable, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(ui->tip_lable, _lv_tip_click_event_cb, LV_EVENT_CLICKED, ui);
     lv_obj_set_style_text_align(ui->tip_lable, LV_TEXT_ALIGN_CENTER, 0);
     // lv_obj_add_flag(ui->tip_lable, LV_OBJ_FLAG_HIDDEN);
+
+    ui->reset_btn = lv_btn_create(mainpage_cont);
+    // // lv_obj_add_event_cb(ui->reset_btn, _connect_btn_event_cb, LV_EVENT_CLICKED, ui);
+    lv_obj_set_pos(ui->reset_btn, 85, 413);
+    lv_obj_add_flag(ui->reset_btn, LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_clear_flag(ui->reset_btn, LV_OBJ_FLAG_SCROLLABLE);  /// Flags
+    set_common_btn_style(ui->reset_btn, 135, 40);
+    lv_obj_t *label = lv_label_create(ui->reset_btn);
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(label, my_font, 0);
+#else
+    lv_obj_set_style_text_font(label, &HanSansCN_20, 0);
+#endif
+    lv_label_set_text(label, "重置网关");
+    lv_obj_center(label);
+    lv_obj_add_event_cb(ui->reset_btn, _reset_gw_event_cb, LV_EVENT_CLICKED, ui);
+
+    lv_obj_add_flag(ui->reset_btn, LV_OBJ_FLAG_HIDDEN);
+#endif
 }
 
-static void msgbox_del(lv_timer_t * tmr)
+static void msgbox_del(lv_timer_t *tmr)
 {
     lv_msgbox_close(tmr->user_data);
 }
@@ -620,16 +786,18 @@ static void _lv_wifi_click_event_cb(lv_event_t *e)
     lv_obj_t *wifi_tag = lv_event_get_target(e);
     lv_ui *ui = lv_event_get_user_data(e);
     uint32_t index = lv_obj_get_index(wifi_tag);
+    lv_obj_t *wifi_name = lv_obj_get_child(wifi_tag, 0);	
+    char *text = lv_label_get_text(wifi_name);
     // ui->wifi_selected = index;
-
+    printf("text = %s\n", text);
     printf("wifi_tag: %d, %s\n", index, st_wifi_item[index].wifi_name);
 
-    lv_obj_t *obj = lv_msgbox_create(NULL, "提示", "连接失败，请检查密码是否正确。", NULL, false);
-    lv_obj_set_style_text_font(obj, &HanSansCN_20, 0);
-    lv_obj_center(obj);
+    // lv_obj_t *obj = lv_msgbox_create(NULL, "提示", "连接失败，请检查密码是否正确。", NULL, false);
+    // lv_obj_set_style_text_font(obj, &HanSansCN_20, 0);
+    // lv_obj_center(obj);
 
-    lv_timer_t * msgbox_tmr = lv_timer_create(msgbox_del, 1000 * 2, obj);
-    lv_timer_set_repeat_count(msgbox_tmr, 1);
+    // lv_timer_t *msgbox_tmr = lv_timer_create(msgbox_del, 1000 * 2, obj);
+    // lv_timer_set_repeat_count(msgbox_tmr, 1);
 #if 0
     memcpy(ui->wifi_select.ssid, st_wifi_item[index].wifi_name, strlen(st_wifi_item[index].wifi_name));
     lv_obj_t *act_scr = lv_scr_act();
@@ -643,12 +811,13 @@ static void _lv_wifi_click_event_cb(lv_event_t *e)
     }
 #endif
 }
-static lv_obj_t *_wifi_list_add_item(lv_ui *ui, lv_obj_t *wifi_list, st_wifi *scan_ap, const char *link_ssid)
+static void _wifi_list_add_item(lv_ui *ui, lv_obj_t *wifi_list, st_wifi *scan_ap, const char *link_ssid)
 {
     lv_obj_t *wifi_item = lv_obj_create(wifi_list);
+    char ssid[32] = {0};
 
     if (wifi_item == NULL) {
-        return NULL;
+        return ;
     }
 
     lv_obj_set_size(wifi_item, 300, 50);
@@ -658,7 +827,6 @@ static lv_obj_t *_wifi_list_add_item(lv_ui *ui, lv_obj_t *wifi_list, st_wifi *sc
     lv_obj_add_flag(wifi_item, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_style_bg_color(wifi_item, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(wifi_item, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_FOCUSED);
-
     lv_obj_t *wifi_name = lv_label_create(wifi_item);
     lv_label_set_text(wifi_name, (const char *)scan_ap->wifi_name);
     lv_label_set_long_mode(wifi_name, LV_LABEL_LONG_SCROLL_CIRCULAR);
@@ -669,10 +837,12 @@ static lv_obj_t *_wifi_list_add_item(lv_ui *ui, lv_obj_t *wifi_list, st_wifi *sc
 
     // wifi st
     lv_obj_t *wifi_st = lv_label_create(wifi_item);
-    if (strcmp(scan_ap->wifi_name, link_ssid) == 0)
+#if 1
+    if (strcmp(scan_ap->wifi_name, ssid) == 0)
         lv_label_set_text(wifi_st, "已连接");
     else
-        lv_label_set_text(wifi_st, "未连接");
+#endif
+    lv_label_set_text(wifi_st, "未连接");
     lv_obj_set_pos(wifi_st, 10, 26);
     lv_obj_set_size(wifi_st, 100, 24);
     lv_obj_set_style_opa(wifi_st, LV_OPA_COVER, 0);
@@ -699,7 +869,7 @@ static lv_obj_t *_wifi_list_add_item(lv_ui *ui, lv_obj_t *wifi_list, st_wifi *sc
 
     lv_obj_add_event_cb(wifi_item, _lv_wifi_click_event_cb, LV_EVENT_CLICKED, ui);
 
-    return wifi_item;
+    // return wifi_item;
 }
 
 /**********************************************************************
@@ -754,6 +924,9 @@ static void _lv_creat_wifi_page(lv_ui *ui, lv_obj_t *title_section)
     lv_obj_set_style_radius(ui->wifi_list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_all(ui->wifi_list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui->wifi_list, lv_color_hex(0x000000), 0);
+
+    // lv_obj_clean(ui->wifi_list);
+#if 0
 
     // test wifi item
     for (size_t i = 0; i < ARRAY_SIZE(st_wifi_item); i++) {
@@ -812,6 +985,7 @@ static void _lv_creat_wifi_page(lv_ui *ui, lv_obj_t *title_section)
         _wifi_list_add_item(ui, ui->wifi_list, &st_wifi_item[i], "vsdfgvdfg");
 #endif
     }
+#endif
 }
 
 /**********************************************************************
@@ -830,7 +1004,11 @@ static void _lv_create_setting_menu(lv_ui *ui)
     lv_menu_set_mode_root_back_btn(ui->menu, LV_MENU_ROOT_BACK_BTN_ENABLED);  // 使能根菜单返回键
     lv_obj_set_size(ui->menu, 480, 480);                                      // 设置大小
     lv_obj_center(ui->menu);                                                  // 居中显示
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(ui->menu, my_font, 0);
+#else
     lv_obj_set_style_text_font(ui->menu, &HanSansCN_20, 0);
+#endif
 
     // lv_obj_t *ok_lable = lv_label_create(ui->menu);
     // lv_label_set_text(ok_lable, "完成");
@@ -839,7 +1017,11 @@ static void _lv_create_setting_menu(lv_ui *ui)
     // lv_obj_set_style_text_color(ok_lable, lv_color_hex(0xffffff), 0);
 
     lv_obj_t *root_page = lv_menu_page_create(ui->menu, "设置");
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(root_page, my_font, 0);
+#else
     lv_obj_set_style_text_font(root_page, &HanSansCN_20, 0);
+#endif
     lv_obj_set_style_pad_hor(root_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(ui->menu), 0), 0);  // 设置水平PAD间距
     lv_obj_t *title_section = lv_menu_item_create(root_page);                                                 // 创建标题
     lv_menu_set_sidebar_page(ui->menu, root_page);                                                            // 设置菜单sidebar风格显示
@@ -870,7 +1052,7 @@ static void _lv_create_setting_menu(lv_ui *ui)
         qr_timer = NULL;
     }
     qr_timer = lv_timer_create(_qrcode_timer_callback, 1000 * GET_QRCODE_TIMEOUT, ui);
-    if(qr_timer != NULL){
+    if (qr_timer != NULL) {
         lv_timer_pause(qr_timer);
     }
 }
@@ -899,7 +1081,6 @@ void setup_scr_Setting(lv_ui *ui)
     lv_style_set_bg_opa(&style_setting_main_main_default, LV_OPA_TRANSP);
     lv_obj_add_style(ui->Setting, &style_setting_main_main_default, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-
-
     _lv_create_setting_menu(ui);
+    hide_flag = false;
 }

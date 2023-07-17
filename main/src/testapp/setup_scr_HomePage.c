@@ -11,8 +11,10 @@
 
 #include "lvgl.h"
 #include <stdio.h>
+#include<unistd.h>
 #include "gui_guider.h"
 #include "ui_common.h"
+
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
@@ -153,16 +155,29 @@ static void Device_scene_click_event_cb(lv_event_t *e)
 	lv_obj_t *obj = lv_event_get_target(e);
 	uint32_t idx = lv_obj_get_index(obj);
 	lv_obj_t *scene_icon = lv_event_get_user_data(e);
-	LV_IMG_DECLARE(scene_on);
-	LV_IMG_DECLARE(scene_off);
 
-	lv_img_set_src(scene_icon, &scene_on);
+	
 	// todo 执行情景
 	printf("idx:%d; dev_id:%d ; name:%s\n", idx, device_item[idx].dev_id, device_item[idx].dev_name);
 
 	// todo 延时绘制或者做个定时器
 	// rtos_delay_milliseconds
 	lv_img_set_src(scene_icon, &scene_off);
+}
+
+static void Device_scene_pressed_event_cb(lv_event_t *e)
+{
+	lv_event_code_t code = lv_event_get_code(e);
+	lv_obj_t *obj = lv_event_get_target(e);
+	uint32_t idx = lv_obj_get_index(obj);
+	lv_obj_t *scene_icon = lv_event_get_user_data(e);
+
+	lv_img_set_src(scene_icon, &scene_on);
+	// sleep(1000);
+
+	lv_img_set_src(scene_icon, &scene_off);
+
+	printf("scene pressed !!\n");
 }
 
 /**********************************************************************
@@ -185,11 +200,13 @@ void Device_scene(lv_obj_t *DeviceList, int16_t device_num)
 	lv_img_set_src(bg, &device_bg);
 
 	// 情景默认状态
-	LV_IMG_DECLARE(scene_off);
+	// LV_IMG_DECLARE(scene_off);
 	lv_obj_t *scene_icon = lv_img_create(scene_btn);
+
 	lv_img_set_src(scene_icon, &scene_off);
 	lv_obj_set_pos(scene_icon, 24, 41);
 	lv_obj_add_event_cb(scene_btn, Device_scene_click_event_cb, LV_EVENT_CLICKED, scene_icon);
+	lv_obj_add_event_cb(scene_btn, Device_scene_pressed_event_cb, LV_EVENT_PRESSED, scene_icon);
 
 	lv_obj_t *scene_name = lv_label_create(scene_btn);
 	lv_label_set_text(scene_name, device_item[device_num].dev_name);
@@ -468,7 +485,7 @@ static void curtain_position_change_event_cb(lv_event_t *e)
 {
 	lv_obj_t *curtain = lv_event_get_target(e);
 	lv_obj_t *curtain_position = lv_event_get_user_data(e);
-	lv_label_set_text_fmt(curtain_position, "%d%%", lv_slider_get_value(curtain));
+	lv_label_set_text_fmt(curtain_position, "%d%%", 100 - lv_slider_get_value(curtain));
 }
 
 static void curtain_position_released_event_cb(lv_event_t *e)
@@ -476,7 +493,7 @@ static void curtain_position_released_event_cb(lv_event_t *e)
 	lv_obj_t *curtain = lv_event_get_target(e);
 	lv_obj_t *obj = lv_event_get_user_data(e);
 	uint32_t idx = lv_obj_get_index(obj);
-	printf("position:%d", lv_slider_get_value(curtain));
+	printf("position:%d ", lv_slider_get_value(curtain));
 	printf("idx:%d; dev_id:%d ; name:%s\n", idx, device_item[idx].dev_id, device_item[idx].dev_name);
 	// todo 发送窗帘的具体参数
 }
@@ -905,14 +922,22 @@ static void _lv_create_Apps_entry(lv_ui *ui)
 	lv_obj_add_event_cb(set_icon, set_icon_event_handler, LV_EVENT_CLICKED, ui);
 
 	lv_obj_t *add_lable = lv_label_create(cont);
+#if LV_USE_MY_FONT
+	lv_obj_set_style_text_font(add_lable, my_font, 0);
+#else
 	lv_obj_set_style_text_font(add_lable, &HanSansCN_20, 0);
+#endif
 	lv_label_set_text(add_lable, "添加");
 	lv_obj_set_pos(add_lable, 120, 104);
 	lv_obj_set_size(add_lable, 100, 25);
 	lv_obj_set_style_text_color(add_lable, lv_color_hex(0xffffff), 0);
 
 	lv_obj_t *set_lable = lv_label_create(cont);
+#if LV_USE_MY_FONT
+	lv_obj_set_style_text_font(set_lable, my_font, 0);
+#else
 	lv_obj_set_style_text_font(set_lable, &HanSansCN_20, 0);
+#endif
 	lv_label_set_text(set_lable, "设置");
 	lv_obj_set_pos(set_lable, 320, 104);
 	lv_obj_set_size(set_lable, 100, 25);

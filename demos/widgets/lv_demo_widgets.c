@@ -7,7 +7,17 @@
  *      INCLUDES
  *********************/
 #include "lv_demo_widgets.h"
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <stdint.h>
 #if LV_USE_DEMO_WIDGETS
 
 #if LV_MEM_CUSTOM == 0 && LV_MEM_SIZE < (38ul * 1024ul)
@@ -780,6 +790,18 @@ static void analytics_create(lv_obj_t * parent)
     lv_obj_align_to(mbps_unit_label, mbps_label, LV_ALIGN_OUT_RIGHT_BOTTOM, 10, 0);
 }
 
+static void shop_list_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_SCROLL_BEGIN) {
+        printf("Shop List Event Scroll Begin\n");
+    }
+    else if(code == LV_EVENT_SCROLL)
+        printf("Shop List Event Scrolling\n");
+    else if(code == LV_EVENT_SCROLL_END)
+        printf("Shop List Event Scroll End\n");
+}
+
 /**********************************************************************
 *Functional description:创建商店
 *Input parameter:
@@ -921,11 +943,25 @@ void shop_create(lv_obj_t * parent)
     lv_obj_add_style(title, &style_title, 0);
 
     LV_IMG_DECLARE(img_clothes);
-    create_shop_item(list, &img_clothes, "Blue jeans", "Clothes", "$722");
-    create_shop_item(list, &img_clothes, "Blue jeans", "Clothes", "$411");
-    create_shop_item(list, &img_clothes, "Blue jeans", "Clothes", "$917");
-    create_shop_item(list, &img_clothes, "Blue jeans", "Clothes", "$64");
-    create_shop_item(list, &img_clothes, "Blue jeans", "Clothes", "$805");
+    create_shop_item(list, NULL, "Blue jeans", "Clothes", "$722");
+    create_shop_item(list, NULL, "Blue jeans", "Clothes", "$411");
+    create_shop_item(list, NULL, "Blue jeans", "Clothes", "$917");
+    create_shop_item(list, NULL, "Blue jeans", "Clothes", "$64");
+    create_shop_item(list, NULL, "Blue jeans", "Clothes", "$805");
+    create_shop_item(list, NULL, "Blue jeans", "Clothes", "$805");
+    create_shop_item(list, NULL, "Blue jeans", "Clothes", "$805");
+    create_shop_item(list, NULL, "Blue jeans", "Clothes", "$805");
+    create_shop_item(list, NULL, "Blue jeans", "Clothes", "$805");
+    create_shop_item(list, NULL, "Blue jeans", "Clothes", "$805");
+
+    create_shop_item(list, NULL, "Blue jeans", "Clothes", "$805");
+    create_shop_item(list, NULL, "Blue jeans", "Clothes", "$805");
+    create_shop_item(list, NULL, "Blue jeans", "Clothes", "$805");
+    create_shop_item(list, NULL, "Blue jeans", "Clothes", "$805");
+    create_shop_item(list, NULL, "Blue jeans", "Clothes", "$805");
+    lv_obj_add_event_cb(list, shop_list_event_cb, LV_EVENT_SCROLL_BEGIN, NULL);
+    lv_obj_add_event_cb(list, shop_list_event_cb, LV_EVENT_SCROLL_END, NULL);
+    lv_obj_add_event_cb(list, shop_list_event_cb, LV_EVENT_SCROLL, NULL);
 
     
 

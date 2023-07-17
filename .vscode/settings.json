@@ -14,6 +14,7 @@
         "lv_demos.h": "c",
         "lv_qrcode.h": "c",
         "lv_mem.h": "c",
-        "lv_color.h": "c"
+        "lv_color.h": "c",
+        "test_ui.h": "c"
     }
 }

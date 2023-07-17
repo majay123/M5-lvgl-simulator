@@ -24,6 +24,7 @@
 #include "lvgl/lvgl.h"
 #include "testapp/gui_guider.h"
 #include "ui/ui.h"
+// #include "3d_printer/test_ui.h"
 
 lv_ui guider_ui;
 
@@ -92,7 +93,62 @@ void lv_example_barcode_1(void)
     lv_obj_set_style_border_width(barcode, 5, 0);
 
     /*Set data*/
-    lv_barcode_update(barcode, "https://lvgl.io");
+    lv_barcode_update(barcode, "");
+}
+
+void lv_example_grid_my(void)
+{
+    static lv_coord_t col_dsc[] = {LV_GRID_CONTENT, LV_GRID_FR(1), LV_GRID_CONTENT, LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t row_dsc[] = {50, 50, 50, LV_GRID_TEMPLATE_LAST};
+
+    /*Create a container with grid*/
+    lv_obj_t * cont = lv_obj_create(lv_scr_act());
+    lv_obj_set_grid_dsc_array(cont, col_dsc, row_dsc);
+    lv_obj_set_size(cont, 300, 220);
+    lv_obj_center(cont);
+
+    lv_obj_t * label;
+    lv_obj_t * obj;
+
+    /*Cell to 0;0 and align to to the start (left/top) horizontally and vertically too*/
+    obj = lv_obj_create(cont);
+    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_START, 0, 1,
+                         LV_GRID_ALIGN_START, 0, 1);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "c0, r0");
+
+    /*Cell to 1;0 and align to to the start (left) horizontally and center vertically too*/
+    obj = lv_obj_create(cont);
+    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_START, 0, 1,
+                         LV_GRID_ALIGN_STRETCH, 1, 2);
+    label = lv_label_create(obj);
+    lv_label_set_text(label, "c0, r1");
+
+    /*Cell to 2;0 and align to to the start (left) horizontally and end (bottom) vertically too*/
+    // obj = lv_obj_create(cont);
+    // lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    // lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_START, 2, 1,
+    //                      LV_GRID_ALIGN_END, 0, 1);
+    // label = lv_label_create(obj);
+    // lv_label_set_text(label, "c2, r0");
+
+    // /*Cell to 1;1 but 2 column wide (span = 2).Set width and height to stretched.*/
+    // obj = lv_obj_create(cont);
+    // lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    // lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 1, 2,
+    //                      LV_GRID_ALIGN_STRETCH, 1, 1);
+    // label = lv_label_create(obj);
+    // lv_label_set_text(label, "c1-2, r1");
+
+    // /*Cell to 0;1 but 2 rows tall (span = 2).Set width and height to stretched.*/
+    // obj = lv_obj_create(cont);
+    // lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    // lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, 0, 1,
+    //                      LV_GRID_ALIGN_STRETCH, 1, 2);
+    // label = lv_label_create(obj);
+    // lv_label_set_text(label, "c0\nr1-2");
 }
 
 int main(int argc, char **argv)
@@ -105,8 +161,8 @@ int main(int argc, char **argv)
 
     /*Initialize the HAL (display, input devices, tick) for LVGL*/
     hal_init();
-    // memset(&guider_ui, 0, sizeof(guider_ui));
-    // setup_ui(&guider_ui);
+    memset(&guider_ui, 0, sizeof(guider_ui));
+    setup_ui(&guider_ui);
     // lv_ex_imgbtn_1();
     //init_ui();
     //lv_demo_benchmark();
@@ -114,6 +170,7 @@ int main(int argc, char **argv)
     // lv_demo_stress();
     // lv_demo_widgets();
     //   lv_demo_music();
+    // lv_example_grid_my();
     // lv_example_btn_1();
     // lv_example_imgbtn_1();
     //    lv_example_slider_3();
@@ -125,7 +182,8 @@ int main(int argc, char **argv)
     // lv_example_checkbox_1();
     // lv_example_msgbox_1();
     // lv_demo_stress();
-    lv_example_barcode_1();
+    // lv_example_barcode_1();
+    // d_ui_init();
 
     while (1) {
         /* Periodically call the lv_task handler.

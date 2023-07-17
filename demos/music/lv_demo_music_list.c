@@ -75,7 +75,7 @@ lv_obj_t * _lv_demo_music_list_create(lv_obj_t * parent)
 #if LV_DEMO_MUSIC_LARGE
     static const lv_coord_t grid_rows[] = {35,  30, LV_GRID_TEMPLATE_LAST};
 #else
-    static const lv_coord_t grid_rows[] = {22,  17, LV_GRID_TEMPLATE_LAST};
+    static const lv_coord_t grid_rows[] = {22,  17, 40, LV_GRID_TEMPLATE_LAST};
 #endif
 
     //设置 按钮样式
@@ -127,7 +127,7 @@ lv_obj_t * _lv_demo_music_list_create(lv_obj_t * parent)
     lv_obj_remove_style_all(list);
     lv_obj_set_size(list, LV_HOR_RES, LV_VER_RES - LV_DEMO_MUSIC_HANDLE_SIZE);
     lv_obj_set_y(list, LV_DEMO_MUSIC_HANDLE_SIZE);
-    lv_obj_add_style(list, &style_scrollbar, LV_PART_SCROLLBAR);
+    // lv_obj_add_style(list, &style_scrollbar, LV_PART_SCROLLBAR);
     lv_obj_set_flex_flow(list, LV_FLEX_FLOW_COLUMN);
 
     uint32_t track_id;
@@ -199,6 +199,9 @@ static lv_obj_t * add_list_btn(lv_obj_t * parent, uint32_t track_id)
 #if LV_DEMO_MUSIC_LARGE
     lv_obj_set_size(btn, lv_pct(100), 110);
 #else
+    if(track_id >= 3) {
+        lv_obj_set_size(btn, lv_pct(100), 90);//高度为60
+    }else
     lv_obj_set_size(btn, lv_pct(100), 60);//高度为60
 #endif
 
@@ -222,13 +225,19 @@ static lv_obj_t * add_list_btn(lv_obj_t * parent, uint32_t track_id)
     //
     lv_obj_t * title_label = lv_label_create(btn);
     lv_label_set_text(title_label, title);
-    lv_obj_set_grid_cell(title_label, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+    lv_obj_set_grid_cell(title_label, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
     lv_obj_add_style(title_label, &style_title, 0);
 
     lv_obj_t * artist_label = lv_label_create(btn);
-    lv_label_set_text(artist_label, artist);
+    if(track_id >= 3) {
+        lv_label_set_text(artist_label, "artist\ntest");
+        lv_obj_set_grid_cell(artist_label, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 1, 2); 
+    }
+    else {
+        lv_label_set_text(artist_label, artist);
+        lv_obj_set_grid_cell(artist_label, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1); 
+    }
     lv_obj_add_style(artist_label, &style_artist, 0);
-    lv_obj_set_grid_cell(artist_label, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 1, 1);
 
     lv_obj_t * time_label = lv_label_create(btn);
     lv_label_set_text(time_label, time);

@@ -207,7 +207,11 @@ static void _lv_creat_add_device_successed(lv_ui *ui)
     lv_obj_set_pos(ui->succeed_lable, 60, 160);
     lv_obj_set_size(ui->succeed_lable, 160, 48);
     lv_obj_set_style_text_color(ui->succeed_lable, lv_color_hex(0xffffff), 0);
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(ui->succeed_lable, my_font, 0);
+#else
     lv_obj_set_style_text_font(ui->succeed_lable, &HanSansCN_20, 0);
+#endif
     lv_label_set_text(ui->succeed_lable, "");
 
     lv_obj_t *btn_add_ok = lv_btn_create(ui->successed_cont);
@@ -215,7 +219,11 @@ static void _lv_creat_add_device_successed(lv_ui *ui)
     set_add_device_btn_style(btn_add_ok, 160, 48);
     lv_obj_set_pos(btn_add_ok, 156, 332);
     lv_obj_t *lab_add_ok = lv_label_create(btn_add_ok);
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(lab_add_ok, my_font, 0);
+#else
     lv_obj_set_style_text_font(lab_add_ok, &HanSansCN_20, 0);
+#endif
     lv_label_set_text(lab_add_ok, "完成");
     lv_obj_align(lab_add_ok, LV_ALIGN_CENTER, 0, 0);
     
@@ -248,7 +256,11 @@ static void _lv_creat_add_device_failed(lv_ui *ui)
     lv_obj_set_pos(failed_lable, 60, 160);
     lv_obj_set_size(failed_lable, 360, 48);
     lv_obj_set_style_text_color(failed_lable, lv_color_hex(0xffffff), 0);
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(failed_lable, my_font, 0);
+#else
     lv_obj_set_style_text_font(failed_lable, &HanSansCN_20, 0);
+#endif
     lv_label_set_text(failed_lable, "未发现设备，请检查待配对设备是否进入配网状态。");
 
     lv_obj_t *btn_add_f = lv_btn_create(ui->failed_cont);
@@ -256,7 +268,11 @@ static void _lv_creat_add_device_failed(lv_ui *ui)
     set_add_device_btn_style(btn_add_f, 160, 48);
     lv_obj_set_pos(btn_add_f, 156, 332);
     lv_obj_t *lab_add_f = lv_label_create(btn_add_f);
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(lab_add_f, my_font, 0);
+#else
     lv_obj_set_style_text_font(lab_add_f, &HanSansCN_20, 0);
+#endif
     lv_label_set_text(lab_add_f, "返回");
     lv_obj_align(lab_add_f, LV_ALIGN_CENTER, 0, 0);
 }
@@ -297,14 +313,22 @@ static void _lv_creat_add_device_page(lv_ui *ui)
     lv_obj_set_pos(findDevice_lable, 160, 40);
     lv_obj_set_size(findDevice_lable, 170, 30);
     lv_obj_set_style_text_color(findDevice_lable, lv_color_hex(0xffffff), 0);
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(findDevice_lable, my_font, 0);
+#else
     lv_obj_set_style_text_font(findDevice_lable, &HanSansCN_20, 0);
+#endif
     lv_label_set_text(findDevice_lable, "正在发现设备");
 
     ui->Countdown_lable = lv_label_create(ui->add_cont);
     lv_obj_set_pos(ui->Countdown_lable, 290, 40);
     lv_obj_set_size(ui->Countdown_lable, 170, 30);
     lv_obj_set_style_text_color(ui->Countdown_lable, lv_color_hex(0xffffff), 0);
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(ui->Countdown_lable, my_font, 0);
+#else
     lv_obj_set_style_text_font(ui->Countdown_lable, &HanSansCN_20, 0);
+#endif
     memset(time, 0, sizeof(time));
     snprintf(time, sizeof(time), "%ds", cDown_cnt);
     lv_label_set_text(ui->Countdown_lable, time);
