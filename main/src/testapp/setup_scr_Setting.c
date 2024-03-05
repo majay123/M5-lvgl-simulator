@@ -14,6 +14,8 @@
 #include "ui_common.h"
 #include <stdio.h>
 
+#include "lv_location_roller.h"
+
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
 typedef struct
@@ -123,7 +125,7 @@ static void _setting_clicked_event_cb(lv_event_t *e)
             // printf("tar", )
             // lv_obj_clean(ui->wifi_list);
             lv_obj_clean(ui->devices_list);
-            for (size_t i = 0; i < ARRAY_SIZE(st_wifi_item); i++) {
+            for (size_t i = 0; i <  ARRAY_SIZE(st_wifi_item); i++) {
                 // printf("create wifi item: [%d]%s\n", i, st_wifi_item[i].wifi_name);
                 _wifi_list_add_item(ui, ui->wifi_list, &st_wifi_item[i], NULL);
             }
@@ -150,6 +152,8 @@ static void _setting_clicked_event_cb(lv_event_t *e)
         }
         case SETTING_MENU_SYS_UPDATE_PAGE: {
         case SETTING_MENU_ABOUT_PAGE: 
+        case SETTING_MENU_LOCATION_PAGE:
+        case SETTING_MENU_VOICE_PAGE:
             lv_obj_clean(ui->wifi_list);
             lv_obj_clean(ui->devices_list);
         }
@@ -175,6 +179,9 @@ static void _setting_clicked_get_barcode_cb(lv_event_t *e)
             lv_obj_add_flag(barcode, LV_OBJ_FLAG_HIDDEN);
             hide_flag = false;
         }
+    }
+    else if(code == LV_EVENT_LONG_PRESSED) {
+        printf("long pressed\n");
     }
 }
 
@@ -222,7 +229,7 @@ static void switch_handler(lv_event_t *e)
                 lv_obj_set_style_bg_color(wifi_item, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_bg_color(wifi_item, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_FOCUSED);
                 lv_obj_set_size(wifi_item, 300, 40);
-                lv_obj_set_style_bg_opa(wifi_item, LV_OPA_COVER, 0);
+                // lv_obj_set_style_bg_opa(wifi_item, LV_OPA_COVER, 0);
 
                 // wifi name
                 lv_obj_t *wifi_name = lv_label_create(wifi_item);
@@ -419,9 +426,12 @@ static void _ota_btn_event_cb(lv_event_t *e)
 {
     lv_obj_t *obj = lv_event_get_target(e);
     lv_ui *ui = lv_event_get_user_data(e);
+    lv_event_code_t code = lv_event_get_code(e);
 
     printf("ota button event: %d\n", lv_event_get_code(e));
-    ui_lv_msgbox_sure_create("发现新版本，是否确认升级？", _update_event_cb, ui);
+    if(code == LV_EVENT_LONG_PRESSED) {
+        printf("long pressed\n");
+    }
 }
 
 static void _qrcode_timer_callback(lv_timer_t *t)
@@ -448,7 +458,8 @@ static void _lv_creat_about_page(lv_ui *ui, lv_obj_t *title_section)
     lv_obj_t *barcode = NULL;
 #endif
 
-    lv_obj_t *about_page = lv_menu_page_create(ui->menu, NULL);                                                // 创建菜单界面
+    lv_obj_t *about_page = lv_menu_page_create(ui->menu, NULL);     // 创建菜单界面
+    lv_obj_clear_flag(about_page, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_style_pad_hor(about_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(ui->menu), 0), 0);  // 设置水平PAD间距
     lv_obj_t *cont = create_text(title_section, "关于");                                                       // 创建Mechanics菜单子项
     lv_menu_set_load_page_event(ui->menu, cont, about_page);
@@ -460,9 +471,10 @@ static void _lv_creat_about_page(lv_ui *ui, lv_obj_t *title_section)
 
     lv_obj_t *about_cont = lv_obj_create(section);
     ui_init_menu_cont(about_cont, LV_OPA_COVER, 0, 60);
-
+    
     lv_obj_t *about_list = lv_obj_create(about_cont);
-    lv_obj_set_pos(about_list, 0, 50);
+    
+    lv_obj_set_pos(about_list, 0, 60);
     lv_obj_set_size(about_list, 300, 400);
     lv_obj_set_flex_flow(about_list, LV_FLEX_FLOW_ROW_WRAP);
     lv_obj_set_layout(about_list, LV_LAYOUT_FLEX);
@@ -471,7 +483,7 @@ static void _lv_creat_about_page(lv_ui *ui, lv_obj_t *title_section)
     lv_obj_set_style_border_width(about_list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_radius(about_list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_all(about_list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(about_list, lv_color_hex(0x000000), 0);
+    // lv_obj_set_style_bg_color(about_list, lv_color_hex(0x000000), 0);
 
     for (size_t i = 0; i < sizeof(about_info) / sizeof(about_info[0]); i++) {
         memset(buf, 0, sizeof(buf));
@@ -541,6 +553,8 @@ static void _lv_creat_about_page(lv_ui *ui, lv_obj_t *title_section)
             }
             case ABOUT_INFO_IP_ADDRESS: {
                 sprintf(buf, "%s  %s", about_info[i], "182.168.1.2");
+                lv_obj_add_flag(about_name, LV_OBJ_FLAG_CLICKABLE);
+                 lv_obj_add_event_cb(about_name, _setting_clicked_get_barcode_cb, LV_EVENT_LONG_PRESSED, barcode);
                 break;
             }
             case ABOUT_INFO_MAC_ADDRES: {
@@ -571,6 +585,7 @@ static void _lv_creat_ota_page(lv_ui *ui, lv_obj_t *title_section)
 
     lv_obj_t *ota_btn = lv_btn_create(ota_cont);
     lv_obj_add_event_cb(ota_btn, _ota_btn_event_cb, LV_EVENT_CLICKED, ui);
+    lv_obj_add_event_cb(ota_btn, _ota_btn_event_cb, LV_EVENT_LONG_PRESSED, ui);
     lv_obj_set_pos(ota_btn, 108, 220);
     lv_obj_set_size(ota_btn, 100, 36);
     lv_obj_add_flag(ota_btn, LV_OBJ_FLAG_CLICKABLE);     /// Flags
@@ -579,7 +594,7 @@ static void _lv_creat_ota_page(lv_ui *ui, lv_obj_t *title_section)
     lv_obj_add_flag(ota_btn, LV_OBJ_FLAG_CLICKABLE);     /// Flags
     lv_obj_clear_flag(ota_btn, LV_OBJ_FLAG_SCROLLABLE);  /// Flags
     lv_obj_set_style_bg_color(ota_btn, lv_color_hex(0xF68F3B), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ota_btn, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // lv_obj_set_style_bg_opa(ota_btn, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_shadow_color(ota_btn, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_shadow_opa(ota_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -589,7 +604,7 @@ static void _lv_creat_ota_page(lv_ui *ui, lv_obj_t *title_section)
 #else
     lv_obj_set_style_text_font(label, &HanSansCN_20, 0);
 #endif
-    lv_label_set_text(label, "检测更新");
+    lv_label_set_text(label, "固件升级");
     lv_obj_center(label);
 #endif
 }
@@ -789,6 +804,7 @@ static void _lv_wifi_click_event_cb(lv_event_t *e)
     lv_obj_t *wifi_name = lv_obj_get_child(wifi_tag, 0);	
     char *text = lv_label_get_text(wifi_name);
     // ui->wifi_selected = index;
+    printf("wifi tag get child num = %d\n", lv_obj_get_child_cnt(wifi_tag));
     printf("text = %s\n", text);
     printf("wifi_tag: %d, %s\n", index, st_wifi_item[index].wifi_name);
 
@@ -821,31 +837,32 @@ static void _wifi_list_add_item(lv_ui *ui, lv_obj_t *wifi_list, st_wifi *scan_ap
     }
 
     lv_obj_set_size(wifi_item, 300, 50);
-    lv_obj_set_style_bg_opa(wifi_item, LV_OPA_COVER, 0);
+    // lv_obj_set_style_bg_opa(wifi_item, LV_OPA_COVER, 0);
     lv_obj_set_style_pad_all(wifi_item, 0, 0);
     lv_obj_set_style_border_width(wifi_item, 0, 0);
     lv_obj_add_flag(wifi_item, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_style_bg_color(wifi_item, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(wifi_item, lv_color_hex(0x333333), LV_PART_MAIN | LV_STATE_FOCUSED);
+
     lv_obj_t *wifi_name = lv_label_create(wifi_item);
     lv_label_set_text(wifi_name, (const char *)scan_ap->wifi_name);
     lv_label_set_long_mode(wifi_name, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_obj_set_pos(wifi_name, 10, 2);
     lv_obj_set_size(wifi_name, 200, 24);
-    lv_obj_set_style_opa(wifi_name, LV_OPA_COVER, 0);
+    // lv_obj_set_style_opa(wifi_name, LV_OPA_COVER, 0);
     lv_obj_set_style_text_color(wifi_name, lv_color_hex(0xffffff), 0);
 
     // wifi st
     lv_obj_t *wifi_st = lv_label_create(wifi_item);
 #if 1
     if (strcmp(scan_ap->wifi_name, ssid) == 0)
-        lv_label_set_text(wifi_st, "已连接");
+        lv_label_set_text(wifi_st, "cont");
     else
 #endif
-    lv_label_set_text(wifi_st, "未连接");
+    lv_label_set_text(wifi_st, "uncont");
     lv_obj_set_pos(wifi_st, 10, 26);
     lv_obj_set_size(wifi_st, 100, 24);
-    lv_obj_set_style_opa(wifi_st, LV_OPA_COVER, 0);
+    // lv_obj_set_style_opa(wifi_st, LV_OPA_COVER, 0);
     lv_obj_set_style_text_color(wifi_st, lv_color_hex(0xffffff), 0);
     // wifi dbm
     lv_obj_t *wifi_dbm = lv_img_create(wifi_item);
@@ -860,6 +877,7 @@ static void _wifi_list_add_item(lv_ui *ui, lv_obj_t *wifi_list, st_wifi *scan_ap
     }
     lv_obj_set_pos(wifi_dbm, 250, 5);
 
+
     // wifi password
     if (scan_ap->lock_st != false) {
         lv_obj_t *wifi_lock = lv_img_create(wifi_item);
@@ -868,7 +886,6 @@ static void _wifi_list_add_item(lv_ui *ui, lv_obj_t *wifi_list, st_wifi *scan_ap
     }
 
     lv_obj_add_event_cb(wifi_item, _lv_wifi_click_event_cb, LV_EVENT_CLICKED, ui);
-
     // return wifi_item;
 }
 
@@ -884,7 +901,9 @@ static void _wifi_list_add_item(lv_ui *ui, lv_obj_t *wifi_list, st_wifi *scan_ap
 static void _lv_creat_wifi_page(lv_ui *ui, lv_obj_t *title_section)
 {
     printf("Creating wifi page\n");
-    lv_obj_t *wifi_page = lv_menu_page_create(ui->menu, NULL);                                                // 创建菜单界面
+    lv_obj_t *wifi_page = lv_menu_page_create(ui->menu, NULL);    
+                                                // 创建菜单界面
+    lv_obj_clear_flag(wifi_page, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_style_pad_hor(wifi_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(ui->menu), 0), 0);  // 设置水平PAD间距
     // 标题
     lv_obj_t *cont = create_text(title_section, "WIFI设置");  // 创建Mechanics菜单子项
@@ -909,7 +928,8 @@ static void _lv_creat_wifi_page(lv_ui *ui, lv_obj_t *title_section)
     // todo 获取wifi开关状态
     lv_obj_t *wifi_switch = lv_switch_create(wifi_cont);
     lv_obj_set_style_bg_color(wifi_switch, lv_color_hex(0xF68F3B), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_add_state(wifi_switch, LV_STATE_CHECKED);
+    // lv_obj_add_state(wifi_switch, LV_STATE_CHECKED);
+    lv_obj_clear_state(wifi_switch, LV_STATE_CHECKED);
     lv_obj_set_pos(wifi_switch, 240, 50);
     lv_obj_add_event_cb(wifi_switch, switch_handler, LV_EVENT_VALUE_CHANGED, ui);
 
@@ -918,12 +938,13 @@ static void _lv_creat_wifi_page(lv_ui *ui, lv_obj_t *title_section)
     lv_obj_set_size(ui->wifi_list, 300, 390);
     lv_obj_set_flex_flow(ui->wifi_list, LV_FLEX_FLOW_ROW_WRAP);
     lv_obj_set_layout(ui->wifi_list, LV_LAYOUT_FLEX);
-    lv_obj_set_style_bg_opa(ui->wifi_list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // lv_obj_set_style_bg_opa(ui->wifi_list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_scrollbar_mode(ui->wifi_list, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_style_border_width(ui->wifi_list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_radius(ui->wifi_list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_all(ui->wifi_list, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui->wifi_list, lv_color_hex(0x000000), 0);
+    //  lv_obj_set_style_text_font(ui->wifi_list, &lv_font_montserrat_10, 0);
 
     // lv_obj_clean(ui->wifi_list);
 #if 0
@@ -988,6 +1009,144 @@ static void _lv_creat_wifi_page(lv_ui *ui, lv_obj_t *title_section)
 #endif
 }
 
+static const char *location_tip = "温馨提示：\n如果设备天气显示正确，请不要进行配置";
+
+static void _lv_location_roller_select(lv_ui *ui)
+{
+
+}
+
+extern void lv_setting_location_select(lv_ui *ui);
+static void _lv_location_click_event_cb(lv_event_t *e)
+{
+    lv_ui *ui = lv_event_get_user_data(e);
+    // if(lv_event_get_code(e) == LV_EVENT_PRESSED)
+    printf("location click event: %d\n", lv_event_get_code(e));
+    lv_setting_location_select(ui);
+    // lv_obj_t *mbox1 = lv_location_roller_create(NULL, "test", "pro_roller", true);
+    // lv_obj_center(mbox1);
+}
+
+// todo 创建位置信息
+static void _lv_create_location_page(lv_ui *ui, lv_obj_t *title_section)
+{
+    printf("Creating location page\n");
+    lv_obj_t *location_set_page = lv_menu_page_create(ui->menu, NULL);                                                // 创建菜单界面
+    lv_obj_clear_flag(location_set_page, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_pad_hor(location_set_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(ui->menu), 0), 0);  // 设置水平PAD间距
+    // 标题
+    lv_obj_t *cont = create_text(title_section, "定位设置");       // 创建Mechanics菜单子项
+
+    lv_menu_set_load_page_event(ui->menu, cont, location_set_page);  // 加载cont到menu,设置跳转界面wifi_page
+    lv_obj_add_event_cb(cont, _setting_clicked_event_cb, LV_EVENT_CLICKED, ui);
+
+    lv_menu_separator_create(location_set_page);                     // ui->menu separator
+    lv_obj_t *section = lv_menu_section_create(location_set_page);   // Create a ui->menu section object
+
+    lv_obj_t *location_cont = lv_obj_create(section);
+    ui_init_menu_cont(location_cont, LV_OPA_COVER, 0, 60);
+
+    lv_obj_t *loc_lable = lv_label_create(location_cont);
+    lv_obj_t *loc_t_lable = lv_label_create(location_cont);
+    lv_obj_t *loc_lable_tip = lv_label_create(location_cont);
+
+    lv_obj_set_pos(loc_lable, 10, 50);
+    lv_obj_set_size(loc_lable, 100, 36);
+
+    lv_obj_set_pos(loc_t_lable, 65, 50);
+    lv_obj_set_size(loc_t_lable, 300, 36);
+
+    lv_obj_set_pos(loc_lable_tip, 10, 350);
+    lv_obj_set_size(loc_lable_tip, 280, 70);
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(loc_lable, my_font, 0);
+    lv_obj_set_style_text_font(loc_t_lable, my_font, 0);
+    lv_obj_set_style_text_font(loc_lable_tip, my_font, 0);
+#else
+    lv_obj_set_style_text_font(loc_lable, &HanSansCN_20, 0);
+    lv_obj_set_style_text_font(loc_lable_tip, &HanSansCN_20, 0);
+#endif
+
+    lv_obj_set_style_text_color(loc_lable, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_label_set_text(loc_lable, "定位：");
+
+    lv_obj_set_style_text_color(loc_t_lable, lv_color_hex(0xF68F3B), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_label_set_text(loc_t_lable, "北京市，北京市");
+    //  lv_obj_add_event_cb(ui->tip_lable, _lv_tip_click_event_cb, LV_EVENT_CLICKED, ui);
+    lv_obj_add_flag(loc_t_lable, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(loc_t_lable, _lv_location_click_event_cb, LV_EVENT_CLICKED, (void *)ui);
+
+    lv_obj_set_style_text_color(loc_lable_tip, lv_color_hex(0xAFAFAF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_label_set_text(loc_lable_tip, location_tip);
+}
+
+static void slider_event_cb(lv_event_t * e)
+{
+    lv_obj_t * slider = lv_event_get_target(e);
+    char buf[8];
+    lv_obj_t *s_lable = lv_event_get_user_data(e);
+
+    lv_snprintf(buf, sizeof(buf), "%d", (int)lv_slider_get_value(slider));
+    lv_label_set_text(s_lable, buf);
+    lv_obj_align_to(s_lable, slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+}
+
+static void _lv_create_voice_page(lv_ui *ui, lv_obj_t *title_section)
+{
+    printf("Creating voice page\n");
+    lv_obj_t *voice_set_page = lv_menu_page_create(ui->menu, NULL);                                                // 创建菜单界面
+    lv_obj_clear_flag(voice_set_page, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_pad_hor(voice_set_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(ui->menu), 0), 0);  // 设置水平PAD间距
+    // 标题
+    lv_obj_t *cont = create_text(title_section, "语音设置");       // 创建Mechanics菜单子项
+
+    lv_menu_set_load_page_event(ui->menu, cont, voice_set_page);  // 加载cont到menu,设置跳转界面wifi_page
+    lv_obj_add_event_cb(cont, _setting_clicked_event_cb, LV_EVENT_CLICKED, ui);
+
+    lv_menu_separator_create(voice_set_page);                     // ui->menu separator
+    lv_obj_t *section = lv_menu_section_create(voice_set_page);   // Create a ui->menu section object
+
+    lv_obj_t *voice_cont = lv_obj_create(section);
+    ui_init_menu_cont(voice_cont, LV_OPA_COVER, 0, 60);
+
+    lv_obj_t *vol_lable = lv_label_create(voice_cont);
+    lv_obj_t *v_slider = lv_slider_create(voice_cont);
+    lv_obj_t *slider_label = lv_label_create(voice_cont);
+    // lv_obj_center(v_slider);
+
+    lv_obj_set_pos(vol_lable, 10, 50);
+    lv_obj_set_size(vol_lable, 100, 36);
+#if LV_USE_MY_FONT
+    lv_obj_set_style_text_font(vol_lable, my_font, 0);
+    lv_obj_set_style_text_font(slider_label, my_font, 0);
+#else
+    lv_obj_set_style_text_font(label, &HanSansCN_20, 0);
+    lv_obj_set_style_text_font(slider_label, &HanSansCN_20, 0);
+#endif
+    lv_obj_set_style_text_color(vol_lable, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_label_set_text(vol_lable, "音量");
+
+    lv_obj_set_style_text_color(slider_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_label_set_text(slider_label, "0");
+
+    lv_obj_set_pos(v_slider, 14, 85);
+    lv_obj_set_style_bg_color(v_slider, lv_color_hex(0xAFAFAF), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(v_slider, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(v_slider, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_border_opa(v_slider, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    lv_obj_set_style_bg_color(v_slider, lv_color_hex(0xF68F3B), LV_PART_INDICATOR | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(v_slider, 255, LV_PART_INDICATOR| LV_STATE_DEFAULT);
+
+    lv_obj_set_style_radius(v_slider, 5, LV_PART_KNOB| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(v_slider, lv_color_hex(0xFFFFFF), LV_PART_KNOB | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_opa(v_slider, 255, LV_PART_KNOB| LV_STATE_DEFAULT);
+    lv_obj_align_to(slider_label, v_slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+    lv_obj_add_event_cb(v_slider, slider_event_cb, LV_EVENT_VALUE_CHANGED, (void *)slider_label);
+
+
+}
+
 /**********************************************************************
  *Functional description:创建设置菜单
  *Input parameter:
@@ -1041,6 +1200,13 @@ static void _lv_create_setting_menu(lv_ui *ui)
 
     // todo 关于界面
     _lv_creat_about_page(ui, title_section);
+    
+    // todo 创建位置信息
+    _lv_create_location_page(ui, title_section);
+
+    // todo 语音设置
+    _lv_create_voice_page(ui, title_section);
+
 
     // 发送点击事件 让首次进入界面直接到wifi
     lv_event_send(lv_obj_get_child(lv_obj_get_child(lv_menu_get_cur_sidebar_page(ui->menu), 0), 0), LV_EVENT_CLICKED, NULL);

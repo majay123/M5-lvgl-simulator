@@ -1,3 +1,43 @@
+/*
+ * 
+ * 　　┏┓　　　┏┓+ +
+ * 　┏┛┻━━━┛┻┓ + +
+ * 　┃　　　　　　　┃ 　
+ * 　┃　　　━　　　┃ ++ + + +
+ *  ████━████ ┃+
+ * 　┃　　　　　　　┃ +
+ * 　┃　　　┻　　　┃
+ * 　┃　　　　　　　┃ + +
+ * 　┗━┓　　　┏━┛
+ * 　　　┃　　　┃　　　　　　　　　　　
+ * 　　　┃　　　┃ + + + +
+ * 　　　┃　　　┃
+ * 　　　┃　　　┃ +  神兽保佑
+ * 　　　┃　　　┃    代码无bug　　
+ * 　　　┃　　　┃　　+　　　　　　　　　
+ * 　　　┃　 　　┗━━━┓ + +
+ * 　　　┃ 　　　　　　　┣┓
+ * 　　　┃ 　　　　　　　┏┛
+ * 　　　┗┓┓┏━┳┓┏┛ + + + +
+ * 　　　　┃┫┫　┃┫┫
+ * 　　　　┗┻┛　┗┻┛+ + + +
+ * 
+ * 
+ * 
+ * ************Copyright 2024 MCD************
+ * 
+ * @version      : 
+ * @Company      : HOPE
+ * @Author       : MCD
+ * @Date         : 2022-03-13 02:28:38
+ * @LastEditors  : MCD
+ * @LastEditTime : 2024-03-04 14:17:35
+ * @FilePath     : /M5-lvgl-simulator/examples/widgets/roller/lv_example_roller_3.c
+ * @Description  : 
+ * 
+ * ******************************************
+ */
+
 #include "../../lv_examples.h"
 #if LV_USE_ROLLER && LV_DRAW_COMPLEX && LV_BUILD_EXAMPLES
 
@@ -9,9 +49,14 @@ static void mask_event_cb(lv_event_t * e)
     static int16_t mask_top_id = -1;
     static int16_t mask_bottom_id = -1;
 
-    if(code == LV_EVENT_COVER_CHECK) {
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        char buf[32];
+        lv_roller_get_selected_str(obj, buf, sizeof(buf));
+        uint16_t index = lv_roller_get_selected(obj);
+        LV_LOG_USER("Selected month: %s, cnt: %d\n", buf, index);
+    }
+    else if(code == LV_EVENT_COVER_CHECK) {
         lv_event_set_cover_res(e, LV_COVER_RES_MASKED);
-
     }
     else if(code == LV_EVENT_DRAW_MAIN_BEGIN) {
         /* add mask */
@@ -52,6 +97,7 @@ static void mask_event_cb(lv_event_t * e)
     }
 }
 
+
 /**
  * Add a fade mask to roller.
  */
@@ -68,6 +114,7 @@ void lv_example_roller_3(void)
     lv_obj_t * roller1 = lv_roller_create(lv_scr_act());
     lv_obj_add_style(roller1, &style, 0);
     lv_obj_set_style_bg_opa(roller1, LV_OPA_TRANSP, LV_PART_SELECTED);
+    lv_obj_set_style_border_color(roller1, lv_color_black(), LV_PART_SELECTED);
 
 #if LV_FONT_MONTSERRAT_22
     lv_obj_set_style_text_font(roller1, &lv_font_montserrat_22, LV_PART_SELECTED);
@@ -89,7 +136,7 @@ void lv_example_roller_3(void)
                           LV_ROLLER_MODE_NORMAL);
 
     lv_obj_center(roller1);
-    lv_roller_set_visible_row_count(roller1, 3);
+    lv_roller_set_visible_row_count(roller1, 5);
     lv_obj_add_event_cb(roller1, mask_event_cb, LV_EVENT_ALL, NULL);
 }
 

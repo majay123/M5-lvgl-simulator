@@ -8,7 +8,8 @@ static void event_handler(lv_event_t * e)
     if(code == LV_EVENT_VALUE_CHANGED) {
         char buf[32];
         lv_roller_get_selected_str(obj, buf, sizeof(buf));
-        LV_LOG_USER("Selected month: %s\n", buf);
+        uint16_t index = lv_roller_get_selected(obj);
+        LV_LOG_USER("Selected month: %s, cnt: %d\n", buf, index);
     }
 }
 

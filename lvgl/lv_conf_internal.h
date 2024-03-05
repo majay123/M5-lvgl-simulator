@@ -2020,7 +2020,7 @@
     #ifdef CONFIG_LV_USE_SJPG
         #define LV_USE_SJPG CONFIG_LV_USE_SJPG
     #else
-        #define LV_USE_SJPG 0
+        #define LV_USE_SJPG 1
     #endif
 #endif
 

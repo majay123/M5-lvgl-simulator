@@ -31,7 +31,7 @@
  * @Author       : MCD
  * @Date         : 2023-05-26 14:05:40
  * @LastEditors  : MCD
- * @LastEditTime : 2023-07-17 13:21:27
+ * @LastEditTime : 2024-03-04 11:34:13
  * @FilePath     : /M5-lvgl-simulator/main/src/testapp/gui_guider.h
  * @Description  : 
  * 
@@ -64,6 +64,9 @@ extern "C" {
 
 #define LCD_WIDTH  480
 #define LCD_HEIGHT 480
+
+#define LIGHT_COLOR_MIN 3000
+#define LIGHT_COLOR_MAX 6400
 
 #define HOPEPAGE_USE_PIC	(0)
 #define COUNTDOWN_CNT_60S (60)    // s
@@ -131,6 +134,8 @@ typedef struct
     lv_obj_t *wifi_keyboard;
     bool Wifi_Set_del;
     sta_scan_res_t wifi_select;
+
+    bool oldmode_enable;
 } lv_ui;
 
 typedef enum {
@@ -139,6 +144,8 @@ typedef enum {
     SETTING_MENU_MAIN_PAGE,
     SETTING_MENU_SYS_UPDATE_PAGE,
     SETTING_MENU_ABOUT_PAGE,
+    SETTING_MENU_LOCATION_PAGE,
+    SETTING_MENU_VOICE_PAGE,
 } setting_menu_page_e;
 
 extern lv_font_t *my_font;
@@ -150,10 +157,11 @@ void setup_scr_HomePage(lv_ui *ui);
 void setup_scr_Setting(lv_ui *ui);
 void setup_scr_AddDevice(lv_ui *ui);
 void ui_wifi_set(lv_ui *ui);
-// void setup_scr_Startup_on(lv_ui *ui);
+void setup_scr_Setting_new(lv_ui *ui);
 
 LV_IMG_DECLARE(bg);
 LV_FONT_DECLARE(HanSansCN_20);
+LV_FONT_DECLARE(HanSansCN_32);
 LV_IMG_DECLARE(light_knob);
 LV_IMG_DECLARE(curtain_knob);
 LV_IMG_DECLARE(curtain_slider);
@@ -165,6 +173,9 @@ LV_IMG_DECLARE(ic_lock);
 LV_IMG_DECLARE(startup_pic);
 LV_IMG_DECLARE(scene_off);
 LV_IMG_DECLARE(scene_on);
+LV_IMG_DECLARE(device_bg);
+LV_IMG_DECLARE(device_bg1);
+LV_IMG_DECLARE(device_bg2);
 
 
 #ifdef __cplusplus
