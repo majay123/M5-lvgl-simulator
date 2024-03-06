@@ -31,7 +31,7 @@
  * @Author       : MCD
  * @Date         : 2023-05-26 14:05:40
  * @LastEditors  : MCD
- * @LastEditTime : 2024-03-04 11:34:13
+ * @LastEditTime : 2024-03-06 14:06:09
  * @FilePath     : /M5-lvgl-simulator/main/src/testapp/gui_guider.h
  * @Description  : 
  * 
@@ -68,11 +68,11 @@ extern "C" {
 #define LIGHT_COLOR_MIN 3000
 #define LIGHT_COLOR_MAX 6400
 
-#define HOPEPAGE_USE_PIC	(0)
-#define COUNTDOWN_CNT_60S (60)    // s
-#define WIFI_PASSWORD_MIN_LEN (8)    // s
-#define GET_QRCODE_TIMEOUT       (1)
-#define GET_QRCODE_MAX_COUNT     (5)
+#define HOPEPAGE_USE_PIC        (0)
+#define COUNTDOWN_CNT_60S       (60)  // s
+#define WIFI_PASSWORD_MIN_LEN   (8)   // s
+#define GET_QRCODE_TIMEOUT      (1)
+#define GET_QRCODE_MAX_COUNT    (5)
 #define SETTING_UI_SHOW_BARCODE (1)
 #define LV_USE_MY_FONT          (1)
 
@@ -85,25 +85,24 @@ typedef enum {
     ABOUT_INFO_MAC_ADDRES,
 } about_info_type_e;
 
-typedef struct _sta_scan_res
-{
-	uint8_t bssid[6];    /**< The BSSID of AP */
-	char ssid[32];     /**< The SSID of AP */
-	char on_channel;   /**< Indicate whether the channel in DS IE is valid 2.4G channel */
-	char channel;      /**< The channel of AP */
-	uint16_t beacon_int; /**< Beacon interval of AP */
-	uint16_t caps;       /**< Capability IE of AP */
-	int level;         /**< RSSI of the received frame */
-	int security;      /**< Encryption algorithm of AP */
-	uint8_t tsf[8];      /**< TSF value in beacon or probe response */
-	uint32_t ie_len;     /**< IE length of beacon or probe response */
-	/* Followed by ie_len of IE data */
+typedef struct _sta_scan_res {
+    uint8_t bssid[6];    /**< The BSSID of AP */
+    char ssid[32];       /**< The SSID of AP */
+    char on_channel;     /**< Indicate whether the channel in DS IE is valid 2.4G channel */
+    char channel;        /**< The channel of AP */
+    uint16_t beacon_int; /**< Beacon interval of AP */
+    uint16_t caps;       /**< Capability IE of AP */
+    int level;           /**< RSSI of the received frame */
+    int security;        /**< Encryption algorithm of AP */
+    uint8_t tsf[8];      /**< TSF value in beacon or probe response */
+    uint32_t ie_len;     /**< IE length of beacon or probe response */
+                         /* Followed by ie_len of IE data */
     uint8_t remember;
-}sta_scan_res_t;
+} sta_scan_res_t;
 
 typedef struct
 {
-    lv_obj_t *HomePage;    //主界面和列表界面
+    lv_obj_t *HomePage;  //主界面和列表界面
     bool HomePage_del;
     lv_obj_t *tabview;     //表单
     lv_obj_t *MainPage;    //主页 显示天气等信息
@@ -136,6 +135,11 @@ typedef struct
     sta_scan_res_t wifi_select;
 
     bool oldmode_enable;
+
+    // location selected
+    lv_obj_t *location_lable;
+    char *province;
+    char *city;
 } lv_ui;
 
 typedef enum {
@@ -147,6 +151,18 @@ typedef enum {
     SETTING_MENU_LOCATION_PAGE,
     SETTING_MENU_VOICE_PAGE,
 } setting_menu_page_e;
+
+typedef struct {
+    char *name;
+    char *code;
+    char *lat;
+    char *lng;
+} local_city_t;
+
+typedef struct {
+    char *prov;
+    local_city_t **cities;
+} st_location;
 
 extern lv_font_t *my_font;
 
@@ -176,7 +192,6 @@ LV_IMG_DECLARE(scene_on);
 LV_IMG_DECLARE(device_bg);
 LV_IMG_DECLARE(device_bg1);
 LV_IMG_DECLARE(device_bg2);
-
 
 #ifdef __cplusplus
 }

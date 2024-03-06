@@ -14,7 +14,6 @@
 #include "ui_common.h"
 #include <stdio.h>
 
-#include "lv_location_roller.h"
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
@@ -1011,12 +1010,11 @@ static void _lv_creat_wifi_page(lv_ui *ui, lv_obj_t *title_section)
 
 static const char *location_tip = "温馨提示：\n如果设备天气显示正确，请不要进行配置";
 
-static void _lv_location_roller_select(lv_ui *ui)
-{
 
-}
 
+extern void lv_get_select_location(lv_ui *ui);
 extern void lv_setting_location_select(lv_ui *ui);
+
 static void _lv_location_click_event_cb(lv_event_t *e)
 {
     lv_ui *ui = lv_event_get_user_data(e);
@@ -1047,20 +1045,22 @@ static void _lv_create_location_page(lv_ui *ui, lv_obj_t *title_section)
     ui_init_menu_cont(location_cont, LV_OPA_COVER, 0, 60);
 
     lv_obj_t *loc_lable = lv_label_create(location_cont);
-    lv_obj_t *loc_t_lable = lv_label_create(location_cont);
+    ui->location_lable = lv_label_create(location_cont);
     lv_obj_t *loc_lable_tip = lv_label_create(location_cont);
 
     lv_obj_set_pos(loc_lable, 10, 50);
     lv_obj_set_size(loc_lable, 100, 36);
 
-    lv_obj_set_pos(loc_t_lable, 65, 50);
-    lv_obj_set_size(loc_t_lable, 300, 36);
+    lv_obj_set_pos(ui->location_lable, 65, 50);
+    lv_label_set_long_mode(ui->location_lable, LV_LABEL_LONG_WRAP);
+    lv_obj_set_size(ui->location_lable, 240, 46);
+    lv_obj_set_style_text_align(ui->location_lable, LV_TEXT_ALIGN_LEFT, 0);
 
     lv_obj_set_pos(loc_lable_tip, 10, 350);
     lv_obj_set_size(loc_lable_tip, 280, 70);
 #if LV_USE_MY_FONT
     lv_obj_set_style_text_font(loc_lable, my_font, 0);
-    lv_obj_set_style_text_font(loc_t_lable, my_font, 0);
+    lv_obj_set_style_text_font(ui->location_lable, my_font, 0);
     lv_obj_set_style_text_font(loc_lable_tip, my_font, 0);
 #else
     lv_obj_set_style_text_font(loc_lable, &HanSansCN_20, 0);
@@ -1070,11 +1070,12 @@ static void _lv_create_location_page(lv_ui *ui, lv_obj_t *title_section)
     lv_obj_set_style_text_color(loc_lable, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_label_set_text(loc_lable, "定位：");
 
-    lv_obj_set_style_text_color(loc_t_lable, lv_color_hex(0xF68F3B), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_label_set_text(loc_t_lable, "北京市，北京市");
+    lv_obj_set_style_text_color(ui->location_lable, lv_color_hex(0xF68F3B), LV_PART_MAIN | LV_STATE_DEFAULT);
+
     //  lv_obj_add_event_cb(ui->tip_lable, _lv_tip_click_event_cb, LV_EVENT_CLICKED, ui);
-    lv_obj_add_flag(loc_t_lable, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(loc_t_lable, _lv_location_click_event_cb, LV_EVENT_CLICKED, (void *)ui);
+    lv_obj_add_flag(ui->location_lable, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(ui->location_lable, _lv_location_click_event_cb, LV_EVENT_CLICKED, (void *)ui);
+    lv_get_select_location(ui);
 
     lv_obj_set_style_text_color(loc_lable_tip, lv_color_hex(0xAFAFAF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_label_set_text(loc_lable_tip, location_tip);
@@ -1147,6 +1148,28 @@ static void _lv_create_voice_page(lv_ui *ui, lv_obj_t *title_section)
 
 }
 
+
+static void _lv_create_empty_page(lv_ui *ui, lv_obj_t *title_section)
+{
+    printf("Creating voice page\n");
+    lv_obj_t *voice_set_page = lv_menu_page_create(ui->menu, NULL);                                                // 创建菜单界面
+    lv_obj_clear_flag(voice_set_page, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_pad_hor(voice_set_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(ui->menu), 0), 0);  // 设置水平PAD间距
+    // 标题
+    lv_obj_t *cont = create_text(title_section, " ");       // 创建Mechanics菜单子项
+
+    lv_menu_set_load_page_event(ui->menu, cont, voice_set_page);  // 加载cont到menu,设置跳转界面wifi_page
+    lv_obj_add_event_cb(cont, _setting_clicked_event_cb, LV_EVENT_CLICKED, ui);
+
+    lv_menu_separator_create(voice_set_page);                     // ui->menu separator
+    lv_obj_t *section = lv_menu_section_create(voice_set_page);   // Create a ui->menu section object
+
+    lv_obj_t *voice_cont = lv_obj_create(section);
+    ui_init_menu_cont(voice_cont, LV_OPA_COVER, 0, 60);
+
+}
+
+
 /**********************************************************************
  *Functional description:创建设置菜单
  *Input parameter:
@@ -1207,6 +1230,10 @@ static void _lv_create_setting_menu(lv_ui *ui)
     // todo 语音设置
     _lv_create_voice_page(ui, title_section);
 
+    // todo 空页面设置
+    _lv_create_empty_page(ui, title_section);
+
+
 
     // 发送点击事件 让首次进入界面直接到wifi
     lv_event_send(lv_obj_get_child(lv_obj_get_child(lv_menu_get_cur_sidebar_page(ui->menu), 0), 0), LV_EVENT_CLICKED, NULL);
@@ -1223,6 +1250,30 @@ static void _lv_create_setting_menu(lv_ui *ui)
     }
 }
 
+void set_scr_Setting_init(lv_ui *ui)
+{
+    ui->Setting = NULL;
+    ui->wifi_list = NULL;
+    ui->devices_list = NULL;
+    ui->qr = NULL;
+    ui->menu = NULL;
+    ui->tip_lable = NULL;
+    ui->reset_btn = NULL;
+    ui->AddDevice = NULL;
+    ui->Countdown_lable = NULL;
+    ui->succeed_lable = NULL;
+    ui->add_cont = NULL;
+    ui->successed_cont = NULL;
+    ui->failed_cont = NULL;
+    ui->Wifi_Set = NULL;
+    ui->wifi_c_btn = NULL;
+    ui->wifi_ok_btn = NULL;
+    ui->wifi_keyboard = NULL;
+    ui->location_lable = NULL;
+    ui->province = NULL;
+    ui->city = NULL;
+}
+
 /**********************************************************************
  *Functional description:设置界面
  *Input parameter:
@@ -1235,6 +1286,7 @@ static void _lv_create_setting_menu(lv_ui *ui)
 void setup_scr_Setting(lv_ui *ui)
 {
     // Write codes APP
+    set_scr_Setting_init(ui);
     ui->Setting = lv_obj_create(NULL);
     lv_obj_set_scrollbar_mode(ui->Setting, LV_SCROLLBAR_MODE_OFF);
 

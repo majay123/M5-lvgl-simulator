@@ -24,6 +24,8 @@ static lv_obj_t * create_switch(lv_obj_t * parent,
 void lv_example_menu_5(void)
 {
     lv_obj_t * menu = lv_menu_create(lv_scr_act());
+    // lv_obj_set_flex_flow(menu, LV_FLEX_FLOW_ROW_WRAP);
+    // lv_obj_set_layout(menu, LV_LAYOUT_FLEX);
 
     lv_color_t bg_color = lv_obj_get_style_bg_color(menu, 0);
     if(lv_color_brightness(bg_color) > 127) {
