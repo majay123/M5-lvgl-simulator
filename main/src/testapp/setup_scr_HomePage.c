@@ -14,6 +14,7 @@
 #include "ui_common.h"
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/time.h>
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
@@ -646,6 +647,53 @@ static void _lv_show_weather(lv_ui *ui)
     lv_label_set_text(weather_lable, "19℃");
 }
 
+static lv_timer_t *test_timer = NULL;
+static struct  timeval  start;
+
+static void _now_timer_callback(lv_timer_t * t)
+{
+    lv_obj_t *act_scr = lv_scr_act();
+    lv_ui * ui = (lv_ui *)test_timer->user_data;
+    struct  timeval  running;
+    // struct  timeval  end;
+    char buf[64] = {0};
+    gettimeofday(&running,NULL);
+
+    // timer = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
+    // timer = 1000000 * (end.tv_sec-start.tv_sec)+ end.tv_usec-start.tv_usec;
+    uint32_t timer = running.tv_sec - start.tv_sec;
+    uint16_t days = timer / 86400;
+    uint16_t hours = (timer % 86400) / 3600;
+    uint16_t minutes = ((timer % 86400) % 3600) / 60;
+    uint16_t seconds = ((timer % 86400) % 3600) % 60;
+
+    snprintf(buf, sizeof(buf), "%d 天 %02d 小时 %02d 分钟 %02d 秒", days, hours,minutes, seconds);
+    lv_label_set_text(ui->running_lable, buf);
+    printf("system running time = %s\n", buf);
+
+}
+
+static void _lv_show_running_time(lv_ui *ui)
+{
+    char buf[64] = {0};
+    lv_obj_t *running_cont = lv_obj_create(ui->MainPage);
+    lv_obj_set_pos(running_cont, 30, 275);
+    lv_obj_set_size(running_cont, 360, 45);
+    ui_init_cont(running_cont, LV_OPA_TRANSP);
+
+    ui->running_lable = lv_label_create(running_cont);
+    lv_obj_set_size(ui->running_lable, 300, 45);
+    lv_obj_set_style_opa(ui->running_lable, LV_OPA_COVER, 0);
+    lv_obj_set_style_text_color(ui->running_lable, lv_color_hex(0xffffff), 0);
+    lv_obj_set_scrollbar_mode(ui->running_lable, LV_SCROLLBAR_MODE_OFF);
+    // LV_FONT_DECLARE(mainpage_36);
+    lv_obj_set_style_text_font(ui->running_lable, my_font, 0);
+    
+    snprintf(buf, sizeof(buf), "%d 天 %02d 小时 %02d 分钟 %02d 秒", 0, 0, 0, 0);
+    lv_label_set_text(ui->running_lable, buf);
+    // sizeof("00 天 00 小时 00 分钟 00 秒");
+}
+
 static void _lv_show_btn(lv_ui *ui)
 {
     lv_obj_t *btn_cont = lv_obj_create(ui->MainPage);
@@ -697,6 +745,8 @@ static void _lv_creat_main_page(lv_ui *ui)
 
     // 显示天气
     _lv_show_weather(ui);
+
+    _lv_show_running_time(ui);
 
     // todo 获取主界面两个设备
     _lv_show_btn(ui);
@@ -895,6 +945,7 @@ static void set_icon_event_handler(lv_event_t *e)
     lv_disp_t *d = lv_obj_get_disp(act_scr);
     if (d->prev_scr == NULL && (d->scr_to_load == NULL || d->scr_to_load == act_scr)) {
         lv_obj_clean(act_scr);
+        lv_timer_del(test_timer);
         if (ui->Setting_del == true)
             setup_scr_Setting(ui);
         lv_scr_load_anim(ui->Setting, LV_SCR_LOAD_ANIM_NONE, 0, 0, true);
@@ -977,6 +1028,18 @@ static void _all_homepage_drew_finished(lv_event_t *e)
         printf("draw mainpage end\n");  //
         lv_obj_remove_event_cb(ui->HomePage, _all_homepage_drew_finished);
     }
+
+}
+
+static void _all_homepage_drew_finished1(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = lv_event_get_user_data(e);
+
+    if (code == LV_EVENT_DRAW_POST_END) {
+        printf("draw post mainpage end\n");  //
+        lv_obj_remove_event_cb(ui->HomePage, _all_homepage_drew_finished1);
+    }
 }
 
 static void lv_load_my_font(const char *file_path)
@@ -1011,9 +1074,11 @@ void setup_scr_HomePage(lv_ui *ui)
     lv_font_free(my_font);
     my_font = NULL;
     lv_load_my_font("/Users/mcd/Desktop/Hope_Work/font.bin");
+    // lv_load_my_font("/Users/mcd/Desktop/Hope_Work/testfont.bin");
     // }
     ui->HomePage = lv_obj_create(NULL);
     lv_obj_add_event_cb(ui->HomePage, _all_homepage_drew_finished, LV_EVENT_DRAW_MAIN_END, ui);
+    lv_obj_add_event_cb(ui->HomePage, _all_homepage_drew_finished1, LV_EVENT_DRAW_POST_END, ui);
     lv_obj_set_scrollbar_mode(ui->HomePage, LV_SCROLLBAR_MODE_OFF);
     // Write style state: LV_STATE_DEFAULT for style_homepage_main_main_default
     static lv_style_t style_homepage_main_main_default;
@@ -1031,4 +1096,6 @@ void setup_scr_HomePage(lv_ui *ui)
 
     // 创建一个APP入口
     _lv_create_Apps_entry(ui);  // 后创建的至于上层
+    gettimeofday(&start,NULL);
+    test_timer = lv_timer_create(_now_timer_callback, 2000, ui);
 }

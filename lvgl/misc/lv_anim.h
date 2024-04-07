@@ -18,6 +18,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 
 /*********************
  *      DEFINES
@@ -166,6 +167,8 @@ static inline void lv_anim_set_values(lv_anim_t * a, int32_t start, int32_t end)
     a->start_value = start;
     a->current_value = start;
     a->end_value = end;
+
+    // printf("====+++=+666, end = %d\n", end);
 }
 
 /**

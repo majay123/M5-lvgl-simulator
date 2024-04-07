@@ -786,7 +786,6 @@ void lv_obj_move_children_by(lv_obj_t * obj, lv_coord_t x_diff, lv_coord_t y_dif
         child->coords.y1 += y_diff;
         child->coords.x2 += x_diff;
         child->coords.y2 += y_diff;
-
         lv_obj_move_children_by(child, x_diff, y_diff, false);
     }
 }

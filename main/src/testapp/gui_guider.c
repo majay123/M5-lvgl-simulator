@@ -31,7 +31,7 @@
  * @Author       : MCD
  * @Date         : 2023-05-15 13:16:14
  * @LastEditors  : MCD
- * @LastEditTime : 2023-09-04 14:23:38
+ * @LastEditTime : 2024-03-26 13:37:23
  * @FilePath     : /M5-lvgl-simulator/main/src/testapp/gui_guider.c
  * @Description  : 
  * 
@@ -76,7 +76,7 @@ void setup_scr_Startup_on(lv_ui *ui)
     lv_obj_set_pos(startup_img, 0, 0);
     lv_obj_set_size(startup_img, 480, 480);
 
-    lv_obj_add_event_cb(startup_img, _all_homepage_drew_finished, LV_EVENT_DRAW_MAIN_END, startup_img);
+    lv_obj_add_event_cb(startup_img, _all_homepage_drew_finished, LV_EVENT_DRAW_POST_END, startup_img);
 
     lv_obj_t *act_scr = lv_scr_act();
     lv_disp_t *d = lv_obj_get_disp(act_scr);
@@ -106,9 +106,22 @@ void init_scr_del_flag(lv_ui *ui)
     ui->Wifi_Set_del = true;
 }
 
+static lv_timer_t *test_timer = NULL;
+
+static void _now_timer_callback(lv_timer_t * t)
+{
+    lv_obj_t *act_scr = lv_scr_act();
+    lv_ui * ui = (lv_ui *)test_timer->user_data;
+    printf("\n");
+    printf("ui->HomePage = %p, act_scr = %p\n", ui->HomePage, act_scr);
+    printf("ui->Setting = %p, act_scr = %p\n", ui->Setting, act_scr);
+    printf("\n");
+}
+
 void setup_ui(lv_ui *ui)
 {
     init_scr_del_flag(ui);
+    // test_timer = lv_timer_create(_now_timer_callback, 1000, ui);
     // lv_load_my_font("/Users/mcd/Desktop/Hope_Work/HanSansCN.font");
     // lv_load_my_font("/Users/mcd/Desktop/Hope_Work/font.bin");
     ui->oldmode_enable = true; 

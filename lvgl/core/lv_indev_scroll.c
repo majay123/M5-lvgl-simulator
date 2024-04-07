@@ -84,7 +84,7 @@ void _lv_indev_scroll_handler(_lv_indev_proc_t * proc)
 
         /*Respect the scroll limit area*/
         scroll_limit_diff(proc, &diff_x, &diff_y);
-
+        // LV_LOG_WARN("=========diff_x = %d, diff_y = %d", diff_x, diff_y);
         lv_obj_scroll_by(scroll_obj, diff_x, diff_y, LV_ANIM_OFF);
         proc->types.pointer.scroll_sum.x += diff_x;
         proc->types.pointer.scroll_sum.y += diff_y;
@@ -152,9 +152,12 @@ void _lv_indev_scroll_throw_handler(_lv_indev_proc_t * proc)
         /*With snapping find the nearest snap point and scroll there*/
         else {
             lv_coord_t diff_x = scroll_throw_predict_x(proc);
+            // LV_LOG_WARN("=======diff_x = %d", diff_x);
             proc->types.pointer.scroll_throw_vect.x = 0;
             scroll_limit_diff(proc, &diff_x, NULL);
+            // LV_LOG_WARN("=======new diff_x = %d, LV_COORD_MIN = %d, LV_COORD_MAX = %d", diff_x, LV_COORD_MIN, LV_COORD_MAX);
             lv_coord_t x = find_snap_point_x(scroll_obj, LV_COORD_MIN, LV_COORD_MAX, diff_x);
+            // LV_LOG_WARN("============x = %d", x);
             lv_obj_scroll_by(scroll_obj, x + diff_x, 0, LV_ANIM_ON);
         }
     }
@@ -189,7 +192,7 @@ void _lv_indev_scroll_throw_handler(_lv_indev_proc_t * proc)
                 }
             }
         }
-
+        // LV_LOG_WARN("+++++++22++++++++++");
         lv_event_send(scroll_obj, LV_EVENT_SCROLL_END, indev_act);
         if(proc->reset_query) return;
 
@@ -431,6 +434,7 @@ static lv_coord_t find_snap_point_x(const lv_obj_t * obj, lv_coord_t min, lv_coo
         if(lv_obj_has_flag(child, LV_OBJ_FLAG_SNAPPABLE)) {
             lv_coord_t x_child = 0;
             lv_coord_t x_parent = 0;
+            // LV_LOG_WARN("======align =  %d", align);
             switch(align) {
                 case LV_SCROLL_SNAP_START:
                     x_child = child->coords.x1;
@@ -562,7 +566,7 @@ static lv_coord_t scroll_throw_predict_x(_lv_indev_proc_t * proc)
 
     lv_indev_t * indev_act = lv_indev_get_act();
     lv_coord_t scroll_throw = indev_act->driver->scroll_throw;
-
+    // LV_LOG_WARN("==========scroll_throw = %d, x = %d", scroll_throw, x);
     while(x) {
         move += x;
         x = x * (100 - scroll_throw) / 100;

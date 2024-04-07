@@ -31,7 +31,7 @@
  * @Author       : MCD
  * @Date         : 2023-05-26 14:05:40
  * @LastEditors  : MCD
- * @LastEditTime : 2024-03-06 14:06:09
+ * @LastEditTime : 2024-03-26 14:07:44
  * @FilePath     : /M5-lvgl-simulator/main/src/testapp/gui_guider.h
  * @Description  : 
  * 
@@ -109,6 +109,7 @@ typedef struct
     lv_obj_t *DevicePage;  //设备列表页面
     lv_obj_t *DeviceList;  //设备列表控件
     lv_obj_t *Apps_entry;  //APP入口
+    lv_obj_t *running_lable;  //运行时间
 
     lv_obj_t *Setting;
     lv_obj_t *wifi_list;

@@ -830,6 +830,7 @@ static void indev_proc_press(_lv_indev_proc_t * proc)
     if(new_obj_searched && proc->types.pointer.last_obj) {
         proc->types.pointer.scroll_throw_vect.x = 0;
         proc->types.pointer.scroll_throw_vect.y = 0;
+        // LV_LOG_WARN("ddfaf============");
         _lv_indev_scroll_throw_handler(proc);
         if(indev_reset_check(proc)) return;
     }
@@ -972,6 +973,7 @@ static void indev_proc_release(_lv_indev_proc_t * proc)
     /*The reset can be set in the Call the ancestor's event handler function.
      * In case of reset query ignore the remaining parts.*/
     if(scroll_obj) {
+        // LV_LOG_WARN("kkkk============");
         _lv_indev_scroll_throw_handler(proc);
         if(indev_reset_check(proc)) return;
     }

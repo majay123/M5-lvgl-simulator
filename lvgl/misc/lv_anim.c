@@ -99,6 +99,7 @@ lv_anim_t * lv_anim_start(const lv_anim_t * a)
     if(new_anim->early_apply) {
         if(new_anim->get_value_cb) {
             int32_t v_ofs = new_anim->get_value_cb(new_anim);
+            LV_LOG_WARN("====+++=+333");
             new_anim->start_value += v_ofs;
             new_anim->end_value += v_ofs;
         }
@@ -368,6 +369,7 @@ static void anim_timer(lv_timer_t * param)
                 if(a->early_apply == 0 && a->get_value_cb) {
                     int32_t v_ofs = a->get_value_cb(a);
                     a->start_value += v_ofs;
+                    LV_LOG_WARN("====+++=+444");
                     a->end_value += v_ofs;
                 }
                 if(a->start_cb) a->start_cb(a);
@@ -444,6 +446,7 @@ static void anim_ready_handler(lv_anim_t * a)
             /*Swap the start and end values*/
             int32_t tmp    = a->start_value;
             a->start_value = a->end_value;
+            LV_LOG_WARN("====+++=+555");
             a->end_value   = tmp;
             /*Swap the time and playback_time*/
             tmp = a->time;

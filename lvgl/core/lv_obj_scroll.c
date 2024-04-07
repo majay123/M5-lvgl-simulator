@@ -11,7 +11,6 @@
 #include "lv_indev.h"
 #include "lv_disp.h"
 #include "lv_indev_scroll.h"
-
 /*********************
  *      DEFINES
  *********************/
@@ -242,6 +241,11 @@ void lv_obj_get_scroll_end(struct _lv_obj_t  * obj, lv_point_t * end)
 {
     lv_anim_t * a;
     a = lv_anim_get(obj, scroll_x_anim);
+    // if(a == NULL)
+    //     LV_LOG_WARN("null====");
+    // else 
+    //     LV_LOG_WARN("end_value: %d\n", a->end_value);
+    // LV_LOG_WARN(" lv_obj_get_scroll_x: %d\n", lv_obj_get_scroll_x(obj));
     end->x = a ? -a->end_value : lv_obj_get_scroll_x(obj);
 
     a = lv_anim_get(obj, scroll_y_anim);
@@ -296,6 +300,7 @@ void lv_obj_scroll_by_bounded(lv_obj_t * obj, lv_coord_t dx, lv_coord_t dy, lv_a
     dx = x_bounded - x_current;
     dy = y_bounded - y_current;
     if(dx || dy) {
+        // LV_LOG_WARN("dx = %d, dy = %d\n", dx, dy);
         lv_obj_scroll_by(obj, dx, dy, anim_en);
     }
 }
@@ -317,6 +322,7 @@ void lv_obj_scroll_by(lv_obj_t * obj, lv_coord_t dx, lv_coord_t dy, lv_anim_enab
             if(t > SCROLL_ANIM_TIME_MAX) t = SCROLL_ANIM_TIME_MAX;
             lv_anim_set_time(&a, t);
             lv_coord_t sx = lv_obj_get_scroll_x(obj);
+            // LV_LOG_WARN("dx = %d, dy = %d, -sx = %d, -sx + dx = %d\n", dx, dy, -sx, -sx + dx);
             lv_anim_set_values(&a, -sx, -sx + dx);
             lv_anim_set_exec_cb(&a, scroll_x_anim);
             lv_anim_set_path_cb(&a, lv_anim_path_ease_out);
@@ -368,7 +374,7 @@ void lv_obj_scroll_to_x(lv_obj_t * obj, lv_coord_t x, lv_anim_enable_t anim_en)
 
     lv_coord_t scroll_x = lv_obj_get_scroll_x(obj);
     lv_coord_t diff = -x + scroll_x;
-
+    // LV_LOG_WARN("diff: %d\n", diff);
     lv_obj_scroll_by_bounded(obj, diff, 0, anim_en);
 }
 
