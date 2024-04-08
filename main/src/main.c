@@ -541,7 +541,7 @@ int main(int argc, char **argv)
     /*Initialize the HAL (display, input devices, tick) for LVGL*/
     hal_init();
     memset(&guider_ui, 0, sizeof(guider_ui));
-    // setup_ui(&guider_ui);
+    setup_ui(&guider_ui);
     // x86_setup();
     // lv_example_list_2();
     // lv_example_list_1();
@@ -568,7 +568,7 @@ int main(int argc, char **argv)
     //   lv_example_anim_2();
     // lv_example_img_3();
     // lv_example_keyboard_1();
-    lv_example_checkbox_1();
+    // lv_example_checkbox_1();
     // lv_example_msgbox_1();
     // lv_demo_stress();
     // lv_example_barcode_1();
