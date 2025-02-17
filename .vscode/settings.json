@@ -29,5 +29,10 @@
         "ningxia",
         "xianggang",
         "xingjiang"
-    ]
+    ],
+    "editor.fontFamily": "Monaco, Menlo, Consolas,  MesloLGS NF, 'Courier New',  monospace",
+    "aide.openaiKey": "sk-None-sB2bspjoElMH359Vy9wuT3BlbkFJG3B6aHFJv3ypqHxM23gC",
+    "aide.convertLanguagePairs": {
+        "c": "c"
+    }
 }

@@ -18,6 +18,7 @@
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
+static bool is_sliding = false;
 
 
 // 模拟数据
@@ -80,6 +81,7 @@ static void set_main_page_device_card_style(lv_obj_t *device, int w, int h)
  ***********************************************************************/
 static void Device_switch_click_event_cb(lv_event_t *e)
 {
+    lv_indev_wait_release(lv_indev_get_act());
     lv_obj_t *obj = lv_event_get_target(e);
 
     uint32_t idx = lv_obj_get_index(obj);
@@ -121,6 +123,7 @@ static void Device_switch_click_event_cb(lv_event_t *e)
 
 static void Device_switch_value_event_cb(lv_event_t *e)
 {
+    lv_indev_wait_release(lv_indev_get_act());
     lv_obj_t *obj = lv_event_get_target(e);
     lv_obj_t *light_icon = lv_event_get_user_data(e);
     uint32_t idx = lv_obj_get_index(light_icon);
@@ -735,7 +738,7 @@ static void _lv_show_btn(lv_ui *ui)
     ui_init_cont(btn_cont, LV_OPA_TRANSP);
     lv_obj_set_flex_flow(btn_cont, LV_FLEX_FLOW_ROW_WRAP);
     lv_obj_set_layout(btn_cont, LV_LAYOUT_FLEX);
-
+    lv_obj_clear_flag(btn_cont, LV_OBJ_FLAG_GESTURE_BUBBLE);
     // todo 普通灯和情景可以使用同个接口，调光灯需要再写一个
     Device_switch(btn_cont, 1);
     Device_switch(btn_cont, 1);
@@ -760,7 +763,7 @@ static void _lv_creat_main_page(lv_ui *ui)
     lv_obj_set_size(ui->MainPage, LCD_WIDTH, LCD_HEIGHT);
     lv_obj_set_style_pad_all(ui->MainPage, 0, 0);
     // lv_obj_clear_flag(ui->MainPage, LV_OBJ_FLAG_SCROLLABLE);  // 禁止界面左右滑动
-    lv_obj_clear_flag(ui->MainPage, LV_OBJ_FLAG_SCROLL_CHAIN_VER);
+    // lv_obj_clear_flag(ui->MainPage, LV_OBJ_FLAG_SCROLL_CHAIN_VER);
     // lv_obj_clear_flag(ui->MainPage, LV_OBJ_FLAG_SCROLL_CHAIN_HOR);
     lv_obj_set_scrollbar_mode(ui->MainPage, LV_SCROLLBAR_MODE_OFF);
 
@@ -925,6 +928,8 @@ static void _lv_creat_device_one_page(lv_ui *ui, uint8_t page_index, uint8_t siz
 
     // 创建设备列表
     lv_obj_t *DeviceList = lv_obj_create(DevicePage);
+    lv_obj_clear_flag(DeviceList, LV_OBJ_FLAG_GESTURE_BUBBLE);
+
     lv_obj_set_pos(DeviceList, 0, 20);
     lv_obj_set_size(DeviceList, LCD_WIDTH, 460);
     lv_obj_set_flex_flow(DeviceList, LV_FLEX_FLOW_ROW_WRAP);

@@ -14,6 +14,7 @@
 #include "ui_common.h"
 #include <stdio.h>
 
+#define USE_TABLE_SHOW_LIST     (1)
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 

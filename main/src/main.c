@@ -542,6 +542,7 @@ int main(int argc, char **argv)
     hal_init();
     memset(&guider_ui, 0, sizeof(guider_ui));
     setup_ui(&guider_ui);
+    // lv_example_table_2();
     // x86_setup();
     // lv_example_list_2();
     // lv_example_list_1();

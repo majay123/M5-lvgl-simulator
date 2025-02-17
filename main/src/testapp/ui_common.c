@@ -31,7 +31,7 @@
  * @Author       : MCD
  * @Date         : 2023-05-25 19:25:02
  * @LastEditors  : MCD
- * @LastEditTime : 2023-06-29 14:20:06
+ * @LastEditTime : 2024-07-22 16:35:39
  * @FilePath     : /M5-lvgl-simulator/main/src/testapp/ui_common.c
  * @Description  : 
  * 
@@ -70,6 +70,7 @@ void ui_init_device(lv_obj_t *device)
     lv_obj_set_pos(device, 0, 0);
     lv_obj_set_style_pad_all(device, 0, 0);
     lv_obj_set_style_border_width(device, 0, 0);
+    lv_obj_clear_flag(device, LV_OBJ_FLAG_PRESS_LOCK);
 }
 
 void ui_init_menu_cont(lv_obj_t *cont, lv_opa_t value, lv_coord_t x, lv_coord_t y)
