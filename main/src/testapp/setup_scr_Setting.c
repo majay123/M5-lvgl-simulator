@@ -15,8 +15,20 @@
 #include <stdio.h>
 
 #define USE_TABLE_SHOW_LIST     (1)
+#define OPTION_COUNT (4)
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
+
+typedef struct {
+    lv_obj_t *container;  // 按钮背景
+    lv_obj_t *label;      // 文字
+    lv_obj_t *radio_btn;  // 圆形单选按钮
+    lv_obj_t *radio_inner; // 内部填充小圆点
+    bool selected;
+} custom_radio_t;
+
+static custom_radio_t radio_buttons[OPTION_COUNT]; // 存储所有单选按钮
+static const char *option_texts[OPTION_COUNT] = {"1分钟", "2分钟", "5分钟", "不熄屏"}; // 选项文本
 
 typedef struct
 {
@@ -455,6 +467,128 @@ static void _ota_btn_event_cb(lv_event_t *e)
     }
 }
 
+static void _screen_switch_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_ui *ui = lv_event_get_user_data(e);
+    lv_obj_t *obj = lv_event_get_target(e);
+
+    if (code == LV_EVENT_VALUE_CHANGED) {
+        if (lv_obj_has_state(obj, LV_STATE_CHECKED)) 
+            printf("enable screen saver!\n");
+        else {
+            printf("disable screen saver!\n");
+        }
+    }
+
+}
+
+
+// **单选组互斥逻辑**
+static void _toggle_event_cb(lv_event_t *e) {
+    custom_radio_t *clicked_radio = (custom_radio_t *)lv_event_get_user_data(e);
+    lv_obj_t *btn = lv_event_get_target(e);
+    int index = (int)(intptr_t)lv_obj_get_user_data(btn);  // 取出索引
+    printf("Button %d clicked\n", index);
+
+    // 取消所有按钮的选中状态
+    for (int i = 0; i < OPTION_COUNT; i++) {
+        radio_buttons[i].selected = false;
+        // lv_obj_set_style_bg_color(radio_buttons[i].container, lv_color_make(50, 50, 50), LV_PART_MAIN);
+        lv_obj_set_style_text_color(radio_buttons[i].label, lv_color_make(150, 150, 150), LV_PART_MAIN);
+        lv_obj_set_style_border_color(radio_buttons[i].radio_btn, lv_color_make(150, 150, 150), LV_PART_MAIN);
+        lv_obj_set_style_bg_color(radio_buttons[i].radio_inner, lv_color_make(50, 50, 50), LV_PART_MAIN);
+    }
+
+    // 选中当前按钮
+    clicked_radio->selected = true;
+    // lv_obj_set_style_bg_color(clicked_radio->container, lv_color_black(), LV_PART_MAIN);
+    lv_obj_set_style_text_color(clicked_radio->label, lv_color_white(), LV_PART_MAIN);
+    lv_obj_set_style_border_color(clicked_radio->radio_btn, lv_color_white(), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(clicked_radio->radio_inner, lv_color_white(), LV_PART_MAIN);
+}
+
+
+// **创建单个按钮**
+static void create_custom_radio(lv_obj_t *parent, int index) {
+    custom_radio_t *radio = &radio_buttons[index];
+
+    // **1. 创建背景容器**
+    radio->container = lv_obj_create(parent);
+    lv_obj_set_size(radio->container, 130, 60);
+    lv_obj_set_style_radius(radio->container, 8, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(radio->container, lv_color_make(50, 50, 50), LV_PART_MAIN); // 默认灰色
+    lv_obj_set_style_border_width(radio->container, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(radio->container, 10, LV_PART_MAIN);
+    lv_obj_clear_flag(radio->container, LV_OBJ_FLAG_SCROLLABLE); // **隐藏滚动条**
+    lv_obj_set_grid_cell(radio->container, LV_GRID_ALIGN_CENTER, index % 2, 1,
+                         LV_GRID_ALIGN_CENTER, index / 2, 1); // **2行2列布局**
+
+    // **2. 创建文本**
+    radio->label = lv_label_create(radio->container);
+    lv_label_set_text(radio->label, option_texts[index]);
+    lv_obj_set_style_text_color(radio->label, lv_color_make(150, 150, 150), LV_PART_MAIN);
+    // lv_obj_set_style_text_font(radio->label, &lv_font_montserrat_18, LV_PART_MAIN);
+    lv_obj_align(radio->label, LV_ALIGN_LEFT_MID, 5, 0);
+
+    // **3. 创建外部单选按钮**
+    radio->radio_btn = lv_obj_create(radio->container);
+    lv_obj_set_size(radio->radio_btn, 20, 20);
+    lv_obj_set_style_radius(radio->radio_btn, LV_RADIUS_CIRCLE, LV_PART_MAIN);
+    lv_obj_set_style_border_width(radio->radio_btn, 2, LV_PART_MAIN);
+    lv_obj_set_style_border_color(radio->radio_btn, lv_color_make(150, 150, 150), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(radio->radio_btn, lv_color_make(50, 50, 50), LV_PART_MAIN);
+    lv_obj_align(radio->radio_btn, LV_ALIGN_RIGHT_MID, -5, 0);
+    lv_obj_clear_flag(radio->radio_btn, LV_OBJ_FLAG_SCROLLABLE); 
+
+    // **4. 创建内部填充圆点**
+    radio->radio_inner = lv_obj_create(radio->radio_btn);
+    lv_obj_set_size(radio->radio_inner, 10, 10);
+    lv_obj_set_style_radius(radio->radio_inner, LV_RADIUS_CIRCLE, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(radio->radio_inner, lv_color_make(50, 50, 50), LV_PART_MAIN);
+    lv_obj_set_style_border_width(radio->radio_inner, 0, LV_PART_MAIN);
+    lv_obj_align(radio->radio_inner, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_clear_flag(radio->radio_inner, LV_OBJ_FLAG_SCROLLABLE); 
+
+
+    lv_obj_set_user_data(radio->container, (void *)(intptr_t)index);  // 存储索引
+    // **5. 绑定点击事件**
+    radio->selected = false;
+    lv_obj_add_event_cb(radio->container, _toggle_event_cb, LV_EVENT_CLICKED, radio);
+}
+
+
+// **创建 2行2列的按钮组**
+void test_create_radio_group(lv_obj_t *parent,  int default_index) 
+{
+    // **1. 创建布局容器**
+    lv_obj_t *grid = lv_obj_create(parent);
+    lv_obj_set_size(grid, 300, 180); // 调整大小适配 2行2列
+    // lv_obj_center(grid);
+    lv_obj_set_pos(grid, 10, 290);
+    lv_obj_clear_flag(grid, LV_OBJ_FLAG_SCROLLABLE); // **隐藏滚动条**
+
+    // **设置黑色背景**
+    lv_obj_set_style_bg_color(grid, lv_color_black(), LV_PART_MAIN);
+    lv_obj_set_style_radius(grid, 10, LV_PART_MAIN);  // 圆角
+    lv_obj_set_style_border_width(grid, 0, LV_PART_MAIN); // 无边框
+
+    // **2. 定义网格布局**
+    static lv_coord_t col_dsc[] = {130, 130, LV_GRID_TEMPLATE_LAST}; // 2列
+    static lv_coord_t row_dsc[] = {65, 65, LV_GRID_TEMPLATE_LAST};  // 2行
+    lv_obj_set_grid_dsc_array(grid, col_dsc, row_dsc);
+
+    // **3. 创建四个单选按钮**
+    for (int i = 0; i < OPTION_COUNT; i++) {
+        create_custom_radio(grid, i);
+    }
+
+    // **默认选中项**
+    if (default_index >= 0 && default_index < OPTION_COUNT) {
+        lv_event_send(radio_buttons[default_index].container, LV_EVENT_CLICKED, NULL);
+    }
+}
+
 static void _qrcode_timer_callback(lv_timer_t *t)
 {
     printf("qrcode get\n");
@@ -726,6 +860,62 @@ static void _lv_creat_delete_dev_page(lv_ui *ui, lv_obj_t *title_section)
     }
 #endif
     // 二键开关，三键开关，四按键开关
+}
+
+/**
+* @author  		MCD
+* @date  		2025-02-18-09:52
+* @details		
+*/
+static void _lv_creat_screen_saver_page(lv_ui *ui, lv_obj_t *title_section)
+{
+    lv_obj_t *screen_saver_page = lv_menu_page_create(ui->menu, NULL);
+    lv_obj_set_style_pad_hor(screen_saver_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(ui->menu), 0), 0);  // 设置水平PAD间距
+    // 标题
+    lv_obj_t *cont = create_text(title_section, "屏保设置");         // 创建Mechanics菜单子项
+    lv_menu_set_load_page_event(ui->menu, cont, screen_saver_page);  // 加载cont到menu,设置跳转界面wifi_page
+
+    lv_menu_separator_create(screen_saver_page);                     // ui->menu separator
+    lv_obj_t *section = lv_menu_section_create(screen_saver_page);   // Create a ui->menu section object
+    lv_obj_add_event_cb(cont, _setting_clicked_event_cb, LV_EVENT_CLICKED, ui);
+
+    lv_obj_t *screen_saver_cont = lv_obj_create(section);
+    ui_init_menu_cont(screen_saver_cont, LV_OPA_COVER, 0, 60);
+
+    // todo 创建详细内容
+    lv_obj_t *screen_lable = lv_label_create(screen_saver_cont);
+    lv_label_set_text(screen_lable, "屏保开关");
+    lv_obj_set_pos(screen_lable, 20, 50);
+    lv_obj_set_size(screen_lable, 150, 25);
+    lv_obj_set_style_text_color(screen_lable, lv_color_hex(0xffffff), 0);
+    // lv_obj_set_style_text_color(subdevice_name, lv_color_hex(0x999999), 0);
+
+    lv_obj_t *screen_switch = lv_switch_create(screen_saver_cont);
+    lv_obj_set_style_bg_color(screen_switch, lv_color_hex(0xF68F3B), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_clear_state(screen_switch, LV_STATE_CHECKED);
+    lv_obj_set_pos(screen_switch, 240, 50);
+    lv_obj_add_event_cb(screen_switch, _screen_switch_handler, LV_EVENT_VALUE_CHANGED, ui);
+
+    lv_obj_t *screen_tip_lable = lv_label_create(screen_saver_cont);
+    lv_label_set_text(screen_tip_lable, "温馨提示：\n你可以打开屏保开关来决定是否\n启用屏保功能。");
+    lv_obj_set_pos(screen_tip_lable, 20,80);
+    lv_obj_set_size(screen_lable, 200, 80);
+    lv_obj_set_style_text_color(screen_tip_lable, lv_color_hex(0x999999), 0);
+
+
+    lv_obj_t *off_screen_lable = lv_label_create(screen_saver_cont);
+    lv_label_set_text(off_screen_lable, "息屏时间");
+    lv_obj_set_pos(off_screen_lable, 20, 190);
+    lv_obj_set_size(off_screen_lable, 150, 25);
+    lv_obj_set_style_text_color(off_screen_lable, lv_color_hex(0xffffff), 0);
+
+    lv_obj_t *off_screen_tip_lable = lv_label_create(screen_saver_cont);
+    lv_label_set_text(off_screen_tip_lable, "温馨提示：\n你可以选择下面的时间决定设备\n何时息屏。");
+    lv_obj_set_pos(off_screen_tip_lable, 20,220);
+    lv_obj_set_size(screen_lable, 200, 80);
+    lv_obj_set_style_text_color(off_screen_tip_lable, lv_color_hex(0x999999), 0);
+
+    test_create_radio_group(screen_saver_cont, 0);
 }
 
 /**********************************************************************
@@ -1255,6 +1445,9 @@ static void _lv_create_setting_menu(lv_ui *ui)
 
     // todo 创建解绑设备界面
     _lv_creat_delete_dev_page(ui, title_section);
+
+    // todo 创建屏保设置
+    _lv_creat_screen_saver_page(ui, title_section);
 
     // todo 创建OTA升级界面
     _lv_creat_ota_page(ui, title_section);

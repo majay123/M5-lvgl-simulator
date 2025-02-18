@@ -529,6 +529,241 @@ void lv_example_roller_my(void)
 
 #endif
 
+
+#define OPTION_COUNT 4
+#define MAX_OPTIONS 6  // 允许最大选项数
+
+typedef struct {
+    lv_obj_t *container;  // 按钮背景
+    lv_obj_t *label;      // 文字
+    lv_obj_t *radio_btn;  // 圆形单选按钮
+    lv_obj_t *radio_inner; // 内部填充小圆点
+    bool selected;
+} custom_radio_t;
+
+static custom_radio_t radio_buttons[OPTION_COUNT]; // 存储所有单选按钮
+static const char *option_texts[OPTION_COUNT] = {"1min", "2min", "5min", "never"}; // 选项文本
+
+// **单选组互斥逻辑**
+static void toggle_event_cb(lv_event_t *e) {
+    custom_radio_t *clicked_radio = (custom_radio_t *)lv_event_get_user_data(e);
+
+    // 取消所有按钮的选中状态
+    for (int i = 0; i < OPTION_COUNT; i++) {
+        radio_buttons[i].selected = false;
+        lv_obj_set_style_bg_color(radio_buttons[i].container, lv_color_make(50, 50, 50), LV_PART_MAIN);
+        lv_obj_set_style_text_color(radio_buttons[i].label, lv_color_make(150, 150, 150), LV_PART_MAIN);
+        lv_obj_set_style_border_color(radio_buttons[i].radio_btn, lv_color_make(150, 150, 150), LV_PART_MAIN);
+        lv_obj_set_style_bg_color(radio_buttons[i].radio_inner, lv_color_make(50, 50, 50), LV_PART_MAIN);
+    }
+
+    // 选中当前按钮
+    clicked_radio->selected = true;
+    lv_obj_set_style_bg_color(clicked_radio->container, lv_color_black(), LV_PART_MAIN);
+    lv_obj_set_style_text_color(clicked_radio->label, lv_color_white(), LV_PART_MAIN);
+    lv_obj_set_style_border_color(clicked_radio->radio_btn, lv_color_white(), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(clicked_radio->radio_inner, lv_color_white(), LV_PART_MAIN);
+}
+
+// **创建单个按钮**
+static void create_custom_radio(lv_obj_t *parent, int index) {
+    custom_radio_t *radio = &radio_buttons[index];
+
+    // **1. 创建背景容器**
+    radio->container = lv_obj_create(parent);
+    lv_obj_set_size(radio->container, 120, 50);
+    lv_obj_set_style_radius(radio->container, 8, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(radio->container, lv_color_make(50, 50, 50), LV_PART_MAIN); // 默认灰色
+    lv_obj_set_style_border_width(radio->container, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(radio->container, 10, LV_PART_MAIN);
+    lv_obj_clear_flag(radio->container, LV_OBJ_FLAG_SCROLLABLE); // **隐藏滚动条**
+    lv_obj_set_grid_cell(radio->container, LV_GRID_ALIGN_CENTER, index % 2, 1,
+                         LV_GRID_ALIGN_CENTER, index / 2, 1); // **2行2列布局**
+
+    // **2. 创建文本**
+    radio->label = lv_label_create(radio->container);
+    lv_label_set_text(radio->label, option_texts[index]);
+    lv_obj_set_style_text_color(radio->label, lv_color_make(150, 150, 150), LV_PART_MAIN);
+    lv_obj_set_style_text_font(radio->label, &lv_font_montserrat_18, LV_PART_MAIN);
+    lv_obj_align(radio->label, LV_ALIGN_LEFT_MID, 5, 0);
+
+    // **3. 创建外部单选按钮**
+    radio->radio_btn = lv_obj_create(radio->container);
+    lv_obj_set_size(radio->radio_btn, 20, 20);
+    lv_obj_set_style_radius(radio->radio_btn, LV_RADIUS_CIRCLE, LV_PART_MAIN);
+    lv_obj_set_style_border_width(radio->radio_btn, 2, LV_PART_MAIN);
+    lv_obj_set_style_border_color(radio->radio_btn, lv_color_make(150, 150, 150), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(radio->radio_btn, lv_color_make(50, 50, 50), LV_PART_MAIN);
+    lv_obj_align(radio->radio_btn, LV_ALIGN_RIGHT_MID, -5, 0);
+    lv_obj_clear_flag(radio->radio_btn, LV_OBJ_FLAG_SCROLLABLE); 
+
+    // **4. 创建内部填充圆点**
+    radio->radio_inner = lv_obj_create(radio->radio_btn);
+    lv_obj_set_size(radio->radio_inner, 10, 10);
+    lv_obj_set_style_radius(radio->radio_inner, LV_RADIUS_CIRCLE, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(radio->radio_inner, lv_color_make(50, 50, 50), LV_PART_MAIN);
+    lv_obj_set_style_border_width(radio->radio_inner, 0, LV_PART_MAIN);
+    lv_obj_align(radio->radio_inner, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_clear_flag(radio->radio_inner, LV_OBJ_FLAG_SCROLLABLE); 
+
+    // **5. 绑定点击事件**
+    radio->selected = false;
+    lv_obj_add_event_cb(radio->container, toggle_event_cb, LV_EVENT_CLICKED, radio);
+}
+
+// **创建 2行2列的按钮组**
+void create_radio_group(lv_obj_t *parent,  int default_index) {
+    // **1. 创建布局容器**
+    lv_obj_t *grid = lv_obj_create(parent);
+    lv_obj_set_size(grid, 300, 180); // 调整大小适配 2行2列
+    lv_obj_center(grid);
+    lv_obj_clear_flag(grid, LV_OBJ_FLAG_SCROLLABLE); // **隐藏滚动条**
+
+    lv_obj_set_style_bg_color(grid, lv_color_black(), LV_PART_MAIN);
+    lv_obj_set_style_radius(grid, 10, LV_PART_MAIN);  // 圆角
+    lv_obj_set_style_border_width(grid, 0, LV_PART_MAIN); // 无边框
+    
+    // **2. 定义网格布局**
+    static lv_coord_t col_dsc[] = {120, 120, LV_GRID_TEMPLATE_LAST}; // 2列
+    static lv_coord_t row_dsc[] = {50, 50, LV_GRID_TEMPLATE_LAST};  // 2行
+    lv_obj_set_grid_dsc_array(grid, col_dsc, row_dsc);
+
+    // **3. 创建四个单选按钮**
+    for (int i = 0; i < OPTION_COUNT; i++) {
+        create_custom_radio(grid, i);
+    }
+
+    // **默认选中项**
+    if (default_index >= 0 && default_index < OPTION_COUNT) {
+        lv_event_send(radio_buttons[default_index].container, LV_EVENT_CLICKED, NULL);
+    }
+}
+
+
+// // **创建单选按钮组**
+// void create_radio_group(lv_obj_t *parent, int option_count, int default_index) {
+//     if (option_count > OPTION_COUNT) option_count = OPTION_COUNT;
+
+//     // **布局容器**
+//     lv_obj_t *grid = lv_obj_create(parent);
+//     lv_obj_set_size(grid, 260, 120);
+//     lv_obj_center(grid);
+//     lv_obj_clear_flag(grid, LV_OBJ_FLAG_SCROLLABLE);
+
+//     // **网格布局**
+//     static lv_coord_t col_dsc[] = {120, 120, LV_GRID_TEMPLATE_LAST};
+//     static lv_coord_t row_dsc[] = {50, 50, LV_GRID_TEMPLATE_LAST};
+//     lv_obj_set_grid_dsc_array(grid, col_dsc, row_dsc);
+
+//     // **创建选项**
+//     for (int i = 0; i < option_count; i++) {
+//         create_custom_radio(grid, i);
+//     }
+
+//     // **默认选中项**
+//     if (default_index >= 0 && default_index < option_count) {
+//         lv_event_send(radio_buttons[default_index].container, LV_EVENT_CLICKED, NULL);
+//     }
+// }
+
+
+// #include "lvgl.h"
+
+// #define MAX_OPTIONS 6  // 允许最大选项数
+// static const char *option_texts[] = {"1min", "2min", "5min", "never"}; // 可扩展
+
+// typedef struct {
+//     lv_obj_t *container;
+//     lv_obj_t *label;
+//     lv_obj_t *radio_btn;
+// } custom_radio_t;
+
+// static custom_radio_t radio_buttons[MAX_OPTIONS]; // 选项按钮组
+// static int selected_index = -1;  // 记录当前选中索引
+
+// // **单选事件回调**
+// static void toggle_event_cb(lv_event_t *e) {
+//     custom_radio_t *clicked_radio = (custom_radio_t *)lv_event_get_user_data(e);
+
+//     // 取消所有按钮选中状态
+//     for (int i = 0; i < MAX_OPTIONS; i++) {
+//         lv_obj_clear_state(radio_buttons[i].radio_btn, LV_STATE_CHECKED);
+//         lv_obj_set_style_bg_color(radio_buttons[i].container, lv_color_make(50, 50, 50), LV_PART_MAIN);
+//         lv_obj_set_style_text_color(radio_buttons[i].label, lv_color_make(150, 150, 150), LV_PART_MAIN);
+//     }
+
+//     // 选中当前按钮
+//     selected_index = (int)(clicked_radio - radio_buttons);  // 计算索引
+//     lv_obj_add_state(clicked_radio->radio_btn, LV_STATE_CHECKED);
+//     lv_obj_set_style_bg_color(clicked_radio->container, lv_color_black(), LV_PART_MAIN);
+//     lv_obj_set_style_text_color(clicked_radio->label, lv_color_white(), LV_PART_MAIN);
+
+//     // 发送事件通知外部监听（可扩展）
+//     lv_event_send(clicked_radio->container, LV_EVENT_VALUE_CHANGED, NULL);
+// }
+
+// // **创建单个按钮**
+// static void create_custom_radio(lv_obj_t *parent, int index) {
+//     custom_radio_t *radio = &radio_buttons[index];
+
+//     // **背景容器**
+//     radio->container = lv_obj_create(parent);
+//     lv_obj_set_size(radio->container, 120, 50);
+//     lv_obj_set_style_radius(radio->container, 8, LV_PART_MAIN);
+//     lv_obj_set_style_bg_color(radio->container, lv_color_make(50, 50, 50), LV_PART_MAIN);
+//     lv_obj_set_style_border_width(radio->container, 0, LV_PART_MAIN);
+//     lv_obj_set_style_pad_all(radio->container, 10, LV_PART_MAIN);
+//     lv_obj_clear_flag(radio->container, LV_OBJ_FLAG_SCROLLABLE);
+//     lv_obj_set_grid_cell(radio->container, LV_GRID_ALIGN_CENTER, index % 2, 1,
+//                          LV_GRID_ALIGN_CENTER, index / 2, 1);
+
+//     // **文字**
+//     radio->label = lv_label_create(radio->container);
+//     lv_label_set_text(radio->label, option_texts[index]);
+//     lv_obj_set_style_text_color(radio->label, lv_color_make(150, 150, 150), LV_PART_MAIN);
+//     lv_obj_set_style_text_font(radio->label, &lv_font_montserrat_18, LV_PART_MAIN);
+//     lv_obj_align(radio->label, LV_ALIGN_LEFT_MID, 5, 0);
+
+//     // **单选按钮**
+//     radio->radio_btn = lv_btn_create(radio->container);
+//     lv_obj_set_size(radio->radio_btn, 20, 20);
+//     lv_obj_set_style_radius(radio->radio_btn, LV_RADIUS_CIRCLE, LV_PART_MAIN);
+//     lv_obj_set_style_border_width(radio->radio_btn, 2, LV_PART_MAIN);
+//     lv_obj_set_style_border_color(radio->radio_btn, lv_color_make(150, 150, 150), LV_PART_MAIN);
+//     lv_obj_set_style_bg_color(radio->radio_btn, lv_color_make(50, 50, 50), LV_PART_MAIN);
+//     lv_obj_add_flag(radio->radio_btn, LV_OBJ_FLAG_CHECKABLE);  // 允许选中状态
+//     lv_obj_align(radio->radio_btn, LV_ALIGN_RIGHT_MID, -5, 0);
+
+//     // **绑定点击事件**
+//     lv_obj_add_event_cb(radio->container, toggle_event_cb, LV_EVENT_CLICKED, radio);
+// }
+
+// // **创建单选按钮组**
+// void create_radio_group(lv_obj_t *parent, int option_count, int default_index) {
+//     if (option_count > MAX_OPTIONS) option_count = MAX_OPTIONS;
+
+//     // **布局容器**
+//     lv_obj_t *grid = lv_obj_create(parent);
+//     lv_obj_set_size(grid, 260, 120);
+//     lv_obj_center(grid);
+//     lv_obj_clear_flag(grid, LV_OBJ_FLAG_SCROLLABLE);
+
+//     // **网格布局**
+//     static lv_coord_t col_dsc[] = {120, 120, LV_GRID_TEMPLATE_LAST};
+//     static lv_coord_t row_dsc[] = {50, 50, LV_GRID_TEMPLATE_LAST};
+//     lv_obj_set_grid_dsc_array(grid, col_dsc, row_dsc);
+
+//     // **创建选项**
+//     for (int i = 0; i < option_count; i++) {
+//         create_custom_radio(grid, i);
+//     }
+
+//     // **默认选中项**
+//     if (default_index >= 0 && default_index < option_count) {
+//         lv_event_send(radio_buttons[default_index].container, LV_EVENT_CLICKED, NULL);
+//     }
+// }
+
 extern int x86_setup(void);
 int main(int argc, char **argv)
 {
@@ -541,7 +776,11 @@ int main(int argc, char **argv)
     /*Initialize the HAL (display, input devices, tick) for LVGL*/
     hal_init();
     memset(&guider_ui, 0, sizeof(guider_ui));
+
+
+    // create_radio_group(lv_scr_act(), 0);
     setup_ui(&guider_ui);
+    // lv_example_checkbox_2();
     // lv_example_table_2();
     // x86_setup();
     // lv_example_list_2();

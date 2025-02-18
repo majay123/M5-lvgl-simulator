@@ -18,7 +18,21 @@
         "test_ui.h": "c",
         "gui_setting_guider.h": "c",
         "lv_demo_keypad_encoder.h": "c",
-        "lv_anim.h": "c"
+        "lv_anim.h": "c",
+        "variant": "c",
+        "mouse.h": "c",
+        "sdl.h": "c",
+        "monitor.h": "c",
+        "stdlib.h": "c",
+        "ui_common.h": "c",
+        "stdio.h": "c",
+        "__locale": "c",
+        "cstddef": "c",
+        "deque": "c",
+        "ios": "c",
+        "limits": "c",
+        "locale": "c",
+        "new": "c"
     },
     "cSpell.words": [
         "aomen",

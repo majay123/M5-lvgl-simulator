@@ -31,7 +31,7 @@
  * @Author       : MCD
  * @Date         : 2024-03-04 15:17:15
  * @LastEditors  : MCD
- * @LastEditTime : 2024-03-06 16:26:31
+ * @LastEditTime : 2025-02-18 14:59:42
  * @FilePath     : /M5-lvgl-simulator/main/src/testapp/setup_scr_Locattion.c
  * @Description  : 
  * 

@@ -1,3 +1,43 @@
+/*
+ * 
+ * 　　┏┓　　　┏┓+ +
+ * 　┏┛┻━━━┛┻┓ + +
+ * 　┃　　　　　　　┃ 　
+ * 　┃　　　━　　　┃ ++ + + +
+ *  ████━████ ┃+
+ * 　┃　　　　　　　┃ +
+ * 　┃　　　┻　　　┃
+ * 　┃　　　　　　　┃ + +
+ * 　┗━┓　　　┏━┛
+ * 　　　┃　　　┃　　　　　　　　　　　
+ * 　　　┃　　　┃ + + + +
+ * 　　　┃　　　┃
+ * 　　　┃　　　┃ +  神兽保佑
+ * 　　　┃　　　┃    代码无bug　　
+ * 　　　┃　　　┃　　+　　　　　　　　　
+ * 　　　┃　 　　┗━━━┓ + +
+ * 　　　┃ 　　　　　　　┣┓
+ * 　　　┃ 　　　　　　　┏┛
+ * 　　　┗┓┓┏━┳┓┏┛ + + + +
+ * 　　　　┃┫┫　┃┫┫
+ * 　　　　┗┻┛　┗┻┛+ + + +
+ * 
+ * 
+ * 
+ * ************Copyright 2025 MCD************
+ * 
+ * @version      : 
+ * @Company      : HOPE
+ * @Author       : MCD
+ * @Date         : 2022-03-13 02:28:38
+ * @LastEditors  : MCD
+ * @LastEditTime : 2025-02-17 10:24:45
+ * @FilePath     : /M5-lvgl-simulator/examples/widgets/checkbox/lv_example_checkbox_2.c
+ * @Description  : 
+ * 
+ * ******************************************
+ */
+
 #include "../../lv_examples.h"
 #if LV_USE_CHECKBOX && LV_BUILD_EXAMPLES
 
